@@ -2,9 +2,25 @@ export module ms;
 import casein;
 import quack;
 
-class game_grid : public quack::grid_renderer<36, 36, bool> {
+enum cell { empty, bomb };
+
+constexpr const auto max_bombs = 36;
+constexpr const auto grid_size = 36;
+
+class game_grid : public quack::grid_renderer<grid_size, grid_size, cell> {
+  unsigned m_ticks{};
+
 public:
   void reset_level() {
+    reset_grid();
+    for (auto i = 0; i < max_bombs; i++) {
+      unsigned p = (m_ticks * 115249 ^ m_ticks * 331319) % cells;
+      while (at(p) != empty) {
+        p = (++p * 60493) % cells;
+      }
+      at(p) = bomb;
+    }
+
     constexpr const auto n = 16;
     load_atlas(n, n, [](quack::u8_rgba *img) {
       for (auto i = 0; i < n; i++) {
@@ -12,7 +28,19 @@ public:
       }
     });
     fill_uv([](auto b) { return quack::uv{{0, 0}, {1, 1}}; });
-    fill_colour([](auto b) { return quack::colour{}; });
+    fill_colour([](auto b) {
+      switch (b) {
+      case bomb:
+        return quack::colour{0.3, 0, 0, 1};
+      default:
+        return quack::colour{};
+      }
+    });
+  }
+
+  void repaint() {
+    m_ticks++;
+    grid_renderer::repaint();
   }
 };
 
