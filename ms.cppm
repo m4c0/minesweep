@@ -5,8 +5,14 @@ import quack;
 class game_grid : public quack::grid_renderer<36, 36, bool> {
 public:
   void reset_level() {
-    load_atlas(16, 16, [](quack::u8_rgba *) {});
-    fill_uv([](auto b) { return quack::uv{}; });
+    constexpr const auto n = 16;
+    load_atlas(n, n, [](quack::u8_rgba *img) {
+      for (auto i = 0; i < n; i++) {
+        img[i] = img[n * n - i - 1] = img[n * i] =
+            img[n * i + n - 1] = {64, 64, 64, 255};
+      }
+    });
+    fill_uv([](auto b) { return quack::uv{{0, 0}, {1, 1}}; });
     fill_colour([](auto b) { return quack::colour{}; });
   }
 };
