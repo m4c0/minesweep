@@ -10,7 +10,26 @@ constexpr const auto grid_size = 36;
 class game_grid : public quack::grid_renderer<grid_size, grid_size, cell> {
   unsigned m_ticks{};
 
+  void render() {
+    fill_uv([](auto b) { return quack::uv{{0, 0}, {1, 1}}; });
+    fill_colour([](auto b) {
+      switch (b) {
+      case bomb:
+        return quack::colour{0.3, 0, 0, 1};
+      default:
+        return quack::colour{};
+      }
+    });
+  }
+
 public:
+  void click(int x, int y) {
+    auto gx = grid_size * x / 800;
+    auto gy = grid_size * y / 600;
+    at(gx, gy) = at(gx, gy) == bomb ? empty : bomb;
+    render();
+  }
+
   void reset_level() {
     reset_grid();
     for (auto i = 0; i < max_bombs; i++) {
@@ -27,15 +46,8 @@ public:
         img[i] = img[n * i] = {64, 64, 64, 255};
       }
     });
-    fill_uv([](auto b) { return quack::uv{{0, 0}, {1, 1}}; });
-    fill_colour([](auto b) {
-      switch (b) {
-      case bomb:
-        return quack::colour{0.3, 0, 0, 1};
-      default:
-        return quack::colour{};
-      }
-    });
+
+    render();
   }
 
   void repaint() {
@@ -64,6 +76,11 @@ extern "C" void casein_handle(const casein::event &e) {
       break;
     }
     break;
+  case casein::MOUSE_DOWN: {
+    const auto &[x, y, btn] = e.as<casein::events::mouse_down>().click();
+    r.click(x, y);
+    break;
+  }
   case casein::QUIT:
     r.quit();
     break;
