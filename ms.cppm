@@ -8,8 +8,7 @@ public:
     constexpr const auto n = 16;
     load_atlas(n, n, [](quack::u8_rgba *img) {
       for (auto i = 0; i < n; i++) {
-        img[i] = img[n * n - i - 1] = img[n * i] =
-            img[n * i + n - 1] = {64, 64, 64, 255};
+        img[i] = img[n * i] = {64, 64, 64, 255};
       }
     });
     fill_uv([](auto b) { return quack::uv{{0, 0}, {1, 1}}; });
