@@ -26,6 +26,8 @@ class game_grid : public quack::grid_renderer<grid_size, grid_size, cell> {
 
 public:
   void click(int x, int y) {
+    if (y < 0)
+      return;
     auto gx = grid_size * x / m_width;
     auto gy = grid_size * y / m_height;
     at(gx, gy) = at(gx, gy) == bomb ? empty : bomb;
