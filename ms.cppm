@@ -61,14 +61,14 @@ extern "C" void casein_handle(const casein::event &e) {
 
   switch (e.type()) {
   case casein::CREATE_WINDOW:
-    r.setup(e.as<casein::events::create_window>().native_window_handle());
+    r.setup(*e.as<casein::events::create_window>());
     r.reset_level();
     break;
   case casein::REPAINT:
     r.repaint();
     break;
   case casein::KEY_DOWN:
-    switch (e.as<casein::events::key_down>().key()) {
+    switch (*e.as<casein::events::key_down>()) {
     case casein::K_SPACE:
       r.reset_level();
       break;
@@ -77,7 +77,7 @@ extern "C" void casein_handle(const casein::event &e) {
     }
     break;
   case casein::MOUSE_DOWN: {
-    const auto &[x, y, btn] = e.as<casein::events::mouse_down>().click();
+    const auto &[x, y, btn] = *e.as<casein::events::mouse_down>();
     r.click(x, y);
     break;
   }
