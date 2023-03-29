@@ -8,6 +8,8 @@ constexpr const auto max_bombs = 36;
 constexpr const auto grid_size = 36;
 
 class game_grid : public quack::grid_renderer<grid_size, grid_size, cell> {
+  unsigned m_width{1};
+  unsigned m_height{1};
   unsigned m_ticks{};
 
   void render() {
@@ -24,8 +26,8 @@ class game_grid : public quack::grid_renderer<grid_size, grid_size, cell> {
 
 public:
   void click(int x, int y) {
-    auto gx = grid_size * x / 800;
-    auto gy = grid_size * y / 600;
+    auto gx = grid_size * x / m_width;
+    auto gy = grid_size * y / m_height;
     at(gx, gy) = at(gx, gy) == bomb ? empty : bomb;
     render();
   }
@@ -54,6 +56,11 @@ public:
     m_ticks++;
     grid_renderer::repaint();
   }
+
+  void resize(int w, int h) {
+    m_width = w;
+    m_height = h;
+  }
 };
 
 extern "C" void casein_handle(const casein::event &e) {
@@ -64,6 +71,11 @@ extern "C" void casein_handle(const casein::event &e) {
   case casein::CREATE_WINDOW:
     r.reset_level();
     break;
+  case casein::RESIZE_WINDOW: {
+    const auto &[w, h, live] = *e.as<casein::events::resize_window>();
+    r.resize(w, h);
+    break;
+  }
   case casein::KEY_DOWN:
     switch (*e.as<casein::events::key_down>()) {
     case casein::K_SPACE:
