@@ -7,8 +7,8 @@ struct cell {
   bool bomb;
 };
 
-constexpr const auto max_bombs = 36;
 constexpr const auto grid_size = 36;
+constexpr const auto max_bombs = grid_size * 8;
 
 class game_grid : public quack::grid_renderer<grid_size, grid_size, cell> {
   unsigned m_width{1};
@@ -21,7 +21,8 @@ class game_grid : public quack::grid_renderer<grid_size, grid_size, cell> {
       if (b.bomb) {
         return quack::colour{0.3, 0, 0, 1};
       } else {
-        return quack::colour{};
+        float f = b.count / 8.0f;
+        return quack::colour{0, f, 0, 1};
       }
     });
   }
@@ -33,6 +34,32 @@ class game_grid : public quack::grid_renderer<grid_size, grid_size, cell> {
         p = (++p * 60493) % cells;
       }
       at(p).bomb = true;
+    }
+  }
+
+  void update_numbers() {
+    for (auto y = 0; y < grid_size; y++) {
+      for (auto x = 0; x < grid_size; x++) {
+        update_numbers_at(x, y);
+      }
+    }
+  }
+
+  void update_numbers_at(unsigned x, unsigned y) {
+    if (at(x, y).bomb)
+      return;
+
+    for (auto dy = -1; dy <= 1; dy++) {
+      const auto ny = y + dy;
+      if ((ny < 0) || (ny >= grid_size))
+        continue;
+      for (auto dx = -1; dx <= 1; dx++) {
+        const auto nx = x + dx;
+        if ((nx < 0) || (nx >= grid_size))
+          continue;
+        if (at(nx, ny).bomb)
+          at(x, y).count++;
+      }
     }
   }
 
@@ -58,7 +85,7 @@ public:
   void reset_level() {
     reset_grid();
     setup_bombs();
-    // update_numbers();
+    update_numbers();
     build_atlas();
     render();
   }
