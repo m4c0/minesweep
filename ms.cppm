@@ -5,11 +5,6 @@ import quack;
 
 using namespace ms;
 
-struct cell {
-  unsigned count;
-  bool bomb;
-};
-
 constexpr const auto grid_size = 36;
 constexpr const auto max_bombs = grid_size * 8;
 
@@ -19,7 +14,7 @@ class game_grid : public quack::grid_renderer<grid_size, grid_size, cell> {
   unsigned m_ticks{};
 
   void render() {
-    fill_uv([](auto) { return quack::uv{{0, 0}, {1, 1}}; });
+    fill_uv(uv_filler{});
     fill_colour([](const auto &b) {
       if (b.bomb) {
         return quack::colour{0.3, 0, 0, 1};
