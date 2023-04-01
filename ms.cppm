@@ -24,6 +24,25 @@ class game_grid : public quack::grid_renderer<grid_size, grid_size, cell> {
     });
   }
 
+  void setup_bombs() {
+    for (auto i = 0; i < max_bombs; i++) {
+      unsigned p = (m_ticks * 115249 ^ m_ticks * 331319) % cells;
+      while (at(p) != empty) {
+        p = (++p * 60493) % cells;
+      }
+      at(p) = bomb;
+    }
+  }
+
+  void build_atlas() {
+    constexpr const auto n = 16;
+    load_atlas(n, n, [](quack::u8_rgba *img) {
+      for (auto i = 0; i < n; i++) {
+        img[i] = img[n * i] = {64, 64, 64, 255};
+      }
+    });
+  }
+
 public:
   void click(int x, int y) {
     if (y < 0)
@@ -36,21 +55,8 @@ public:
 
   void reset_level() {
     reset_grid();
-    for (auto i = 0; i < max_bombs; i++) {
-      unsigned p = (m_ticks * 115249 ^ m_ticks * 331319) % cells;
-      while (at(p) != empty) {
-        p = (++p * 60493) % cells;
-      }
-      at(p) = bomb;
-    }
-
-    constexpr const auto n = 16;
-    load_atlas(n, n, [](quack::u8_rgba *img) {
-      for (auto i = 0; i < n; i++) {
-        img[i] = img[n * i] = {64, 64, 64, 255};
-      }
-    });
-
+    setup_bombs();
+    build_atlas();
     render();
   }
 
