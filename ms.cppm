@@ -1,6 +1,9 @@
 export module ms;
+import :atlas;
 import casein;
 import quack;
+
+using namespace ms;
 
 struct cell {
   unsigned count;
@@ -63,14 +66,7 @@ class game_grid : public quack::grid_renderer<grid_size, grid_size, cell> {
     }
   }
 
-  void build_atlas() {
-    constexpr const auto n = 16;
-    load_atlas(n, n, [](quack::u8_rgba *img) {
-      for (auto i = 0; i < n; i++) {
-        img[i] = img[n * i] = {64, 64, 64, 255};
-      }
-    });
-  }
+  void build_atlas() { load_atlas(atlas::width, atlas::height, atlas{}); }
 
 public:
   void click(int x, int y) {
