@@ -2,7 +2,10 @@ export module ms;
 import casein;
 import quack;
 
-enum cell { empty, bomb };
+struct cell {
+  unsigned count;
+  bool bomb;
+};
 
 constexpr const auto max_bombs = 36;
 constexpr const auto grid_size = 36;
@@ -13,12 +16,11 @@ class game_grid : public quack::grid_renderer<grid_size, grid_size, cell> {
   unsigned m_ticks{};
 
   void render() {
-    fill_uv([](auto b) { return quack::uv{{0, 0}, {1, 1}}; });
-    fill_colour([](auto b) {
-      switch (b) {
-      case bomb:
+    fill_uv([](auto) { return quack::uv{{0, 0}, {1, 1}}; });
+    fill_colour([](const auto &b) {
+      if (b.bomb) {
         return quack::colour{0.3, 0, 0, 1};
-      default:
+      } else {
         return quack::colour{};
       }
     });
@@ -27,10 +29,10 @@ class game_grid : public quack::grid_renderer<grid_size, grid_size, cell> {
   void setup_bombs() {
     for (auto i = 0; i < max_bombs; i++) {
       unsigned p = (m_ticks * 115249 ^ m_ticks * 331319) % cells;
-      while (at(p) != empty) {
+      while (at(p).bomb) {
         p = (++p * 60493) % cells;
       }
-      at(p) = bomb;
+      at(p).bomb = true;
     }
   }
 
@@ -49,13 +51,14 @@ public:
       return;
     auto gx = grid_size * x / m_width;
     auto gy = grid_size * y / m_height;
-    at(gx, gy) = at(gx, gy) == bomb ? empty : bomb;
+    at(gx, gy).bomb = !at(gx, gy).bomb;
     render();
   }
 
   void reset_level() {
     reset_grid();
     setup_bombs();
+    // update_numbers();
     build_atlas();
     render();
   }
