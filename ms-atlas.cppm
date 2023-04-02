@@ -7,7 +7,19 @@ struct cell {
 };
 
 namespace ms {
-enum sprites { s_bomb, s_empty, sprite_count };
+enum sprites {
+  s_bomb,
+  s_empty,
+  s_1,
+  s_2,
+  s_3,
+  s_4,
+  s_5,
+  s_6,
+  s_7,
+  s_8,
+  sprite_count
+};
 struct atlas {
   static constexpr const auto width = 8;
   static constexpr const auto height = 8 * sprite_count;
@@ -27,6 +39,70 @@ struct atlas {
                                                         ".      :"
                                                         ".      :"
                                                         ".      :"
+                                                        ".:::::::"
+                                                        ".......:" //
+                                                        ".      :"
+                                                        ".  OO  :"
+                                                        ".   O  :"
+                                                        ".   O  :"
+                                                        ".  OOO :"
+                                                        ".      :"
+                                                        ".:::::::"
+                                                        ".......:" //
+                                                        ".      :"
+                                                        ".  OOO :"
+                                                        ".   OO :"
+                                                        ".  O   :"
+                                                        ".  OOO :"
+                                                        ".      :"
+                                                        ".:::::::"
+                                                        ".......:" //
+                                                        ".      :"
+                                                        ".  OOO :"
+                                                        ".   OO :"
+                                                        ".    O :"
+                                                        ".  OOO :"
+                                                        ".      :"
+                                                        ".:::::::"
+                                                        ".......:" //
+                                                        ".      :"
+                                                        ".  O O :"
+                                                        ".  OOO :"
+                                                        ".    O :"
+                                                        ".    O :"
+                                                        ".      :"
+                                                        ".:::::::"
+                                                        ".......:" //
+                                                        ".      :"
+                                                        ".  OOO :"
+                                                        ".  OO  :"
+                                                        ".    O :"
+                                                        ".  OOO :"
+                                                        ".      :"
+                                                        ".:::::::"
+                                                        ".......:" //
+                                                        ".      :"
+                                                        ".  OOO :"
+                                                        ".  O   :"
+                                                        ".  OOO :"
+                                                        ".  OOO :"
+                                                        ".      :"
+                                                        ".:::::::"
+                                                        ".......:" //
+                                                        ".      :"
+                                                        ". OOO  :"
+                                                        ".   O  :"
+                                                        ".   O  :"
+                                                        ".   O  :"
+                                                        ".      :"
+                                                        ".:::::::"
+                                                        ".......:" //
+                                                        ".      :"
+                                                        ".  OOO :"
+                                                        ".  O O :"
+                                                        ".  OOO :"
+                                                        ".  OOO :"
+                                                        ".      :"
                                                         ".:::::::";
 
   void operator()(quack::u8_rgba *img) {
@@ -44,6 +120,9 @@ struct atlas {
       case ':':
         img[i] = {32, 32, 32, 255};
         break;
+      case 'O':
+        img[i] = {64, 128, 32, 255};
+        break;
       }
     }
   }
@@ -57,9 +136,12 @@ struct uv_filler {
 
   auto operator()(const cell &c) {
     if (c.bomb)
-      return uv(0);
+      return uv(s_bomb);
 
-    return uv(1);
+    if (c.count >= 1 && c.count <= 8)
+      return uv(s_empty + c.count);
+
+    return uv(s_empty);
   }
 };
 } // namespace ms
