@@ -101,7 +101,7 @@ extern "C" void casein_handle(const casein::event &e) {
     r.reset_level();
     break;
   case casein::RESIZE_WINDOW: {
-    const auto &[w, h, live] = *e.as<casein::events::resize_window>();
+    const auto &[w, h, scale, live] = *e.as<casein::events::resize_window>();
     r.resize(w, h);
     break;
   }
