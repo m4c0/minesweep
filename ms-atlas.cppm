@@ -4,12 +4,14 @@ import quack;
 struct cell {
   unsigned count;
   bool bomb;
+  bool visible;
 };
 
 namespace ms {
 enum sprites {
   s_bomb,
   s_empty,
+  s_hidden,
   s_1,
   s_2,
   s_3,
@@ -31,6 +33,14 @@ struct atlas {
                                                         " ****** "
                                                         "  ****  "
                                                         " * ** * "
+                                                        "        "
+                                                        "        " //
+                                                        "        "
+                                                        "        "
+                                                        "        "
+                                                        "        "
+                                                        "        "
+                                                        "        "
                                                         "        "
                                                         ".......:" //
                                                         ".      :"
@@ -135,6 +145,9 @@ struct uv_filler {
   }
 
   auto operator()(const cell &c) {
+    if (!c.visible)
+      return uv(s_hidden);
+
     if (c.bomb)
       return uv(s_bomb);
 

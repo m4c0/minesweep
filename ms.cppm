@@ -16,6 +16,8 @@ class game_grid : public quack::grid_renderer<grid_size, grid_size, cell> {
   void render() {
     fill_uv(uv_filler{});
     fill_colour([](const auto &b) {
+      if (!b.visible)
+        return quack::colour{};
       if (b.bomb) {
         return quack::colour{0.3, 0, 0, 1};
       } else {
@@ -66,7 +68,7 @@ class game_grid : public quack::grid_renderer<grid_size, grid_size, cell> {
 public:
   void click() {
     current_hover().consume([this](auto idx) {
-      at(idx).bomb = !at(idx).bomb;
+      at(idx).visible = true;
       render();
     });
   }
