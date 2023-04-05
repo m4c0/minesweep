@@ -64,13 +64,11 @@ class game_grid : public quack::grid_renderer<grid_size, grid_size, cell> {
   void build_atlas() { load_atlas(atlas::width, atlas::height, atlas{}); }
 
 public:
-  void click(int x, int y) {
-    if (y < 0)
-      return;
-    auto gx = grid_size * x / m_width;
-    auto gy = grid_size * y / m_height;
-    at(gx, gy).bomb = !at(gx, gy).bomb;
-    render();
+  void click() {
+    current_hover().consume([this](auto idx) {
+      at(idx).bomb = !at(idx).bomb;
+      render();
+    });
   }
 
   void reset_level() {
@@ -114,11 +112,9 @@ extern "C" void casein_handle(const casein::event &e) {
       break;
     }
     break;
-  case casein::MOUSE_DOWN: {
-    const auto &[x, y, btn] = *e.as<casein::events::mouse_down>();
-    r.click(x, y);
+  case casein::MOUSE_DOWN:
+    r.click();
     break;
-  }
   default:
     break;
   }
