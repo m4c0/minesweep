@@ -6,7 +6,7 @@ import quack;
 using namespace ms;
 
 constexpr const auto grid_size = 36;
-constexpr const auto max_bombs = grid_size * 8;
+constexpr const auto max_bombs = grid_size * 4;
 
 class game_grid : public quack::grid_renderer<grid_size, grid_size, cell> {
   unsigned m_width{1};
