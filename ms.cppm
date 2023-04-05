@@ -65,10 +65,33 @@ class game_grid : public quack::grid_renderer<grid_size, grid_size, cell> {
 
   void build_atlas() { load_atlas(atlas::width, atlas::height, atlas{}); }
 
+  void fill(unsigned x, unsigned y) {
+    auto &p = at(x, y);
+    if (p.visible)
+      return;
+
+    p.visible = true;
+
+    if (p.count != 0 || p.bomb)
+      return;
+
+    for (auto dx = -1; dx <= 1; dx++) {
+      auto nx = x + dx;
+      if (nx < 0 || nx >= grid_size)
+        continue;
+      for (auto dy = -1; dy <= 1; dy++) {
+        auto ny = y + dy;
+        if (ny < 0 || ny >= grid_size)
+          continue;
+        fill(nx, ny);
+      }
+    }
+  }
+
 public:
   void click() {
     current_hover().consume([this](auto idx) {
-      at(idx).visible = true;
+      fill(idx % grid_size, idx / grid_size);
       render();
     });
   }
