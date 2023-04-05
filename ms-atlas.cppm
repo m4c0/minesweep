@@ -152,7 +152,7 @@ struct uv_filler {
       return uv(s_bomb);
 
     if (c.count >= 1 && c.count <= 8)
-      return uv(s_empty + c.count);
+      return uv(s_1 + c.count - 1);
 
     return uv(s_empty);
   }
