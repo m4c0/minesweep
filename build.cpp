@@ -10,6 +10,7 @@ int main(int argc, char **argv) {
   m->add_part("atlas");
 
   auto a = unit::create<app>("minesweep");
+  a->add_requirement(native);
   a->add_ref(m);
   return run_main(a, argc, argv);
 };
