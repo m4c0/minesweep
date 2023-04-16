@@ -8,14 +8,16 @@ using namespace ms;
 constexpr const auto grid_size = 36;
 constexpr const auto max_bombs = grid_size * 4;
 
-class game_grid : public quack::grid_renderer<grid_size, grid_size, cell> {
-  unsigned m_width{1};
-  unsigned m_height{1};
+class game_grid {
+  quack::renderer m_r{1};
+  quack::grid_ilayout<grid_size, grid_size, cell> m_grid{&m_r};
   unsigned m_ticks{};
 
+  static constexpr const auto cells = decltype(m_grid)::cells;
+
   void render() {
-    fill_uv(uv_filler{});
-    fill_colour([](const auto &b) {
+    m_grid.fill_uv(uv_filler{});
+    m_grid.fill_colour([](const auto &b) {
       if (!b.visible)
         return quack::colour{};
       if (b.bomb) {
@@ -30,10 +32,10 @@ class game_grid : public quack::grid_renderer<grid_size, grid_size, cell> {
   void setup_bombs() {
     for (auto i = 0; i < max_bombs; i++) {
       unsigned p = (m_ticks * 115249 ^ m_ticks * 331319) % cells;
-      while (at(p).bomb) {
+      while (m_grid.at(p).bomb) {
         p = (++p * 60493) % cells;
       }
-      at(p).bomb = true;
+      m_grid.at(p).bomb = true;
     }
   }
 
@@ -46,7 +48,7 @@ class game_grid : public quack::grid_renderer<grid_size, grid_size, cell> {
   }
 
   void update_numbers_at(unsigned x, unsigned y) {
-    if (at(x, y).bomb)
+    if (m_grid.at(x, y).bomb)
       return;
 
     for (auto dy = -1; dy <= 1; dy++) {
@@ -57,16 +59,16 @@ class game_grid : public quack::grid_renderer<grid_size, grid_size, cell> {
         const auto nx = x + dx;
         if ((nx < 0) || (nx >= grid_size))
           continue;
-        if (at(nx, ny).bomb)
-          at(x, y).count++;
+        if (m_grid.at(nx, ny).bomb)
+          m_grid.at(x, y).count++;
       }
     }
   }
 
-  void build_atlas() { load_atlas(atlas::width, atlas::height, atlas{}); }
+  void build_atlas() { m_r.load_atlas(atlas::width, atlas::height, atlas{}); }
 
   void fill(unsigned x, unsigned y) {
-    auto &p = at(x, y);
+    auto &p = m_grid.at(x, y);
     if (p.visible)
       return;
 
@@ -90,44 +92,36 @@ class game_grid : public quack::grid_renderer<grid_size, grid_size, cell> {
 
 public:
   void click() {
-    current_hover().consume([this](auto idx) {
+    m_grid.current_hover().consume([this](auto idx) {
       fill(idx % grid_size, idx / grid_size);
       render();
     });
   }
 
+  void process_event(const casein::event &e) {
+    m_r.process_event(e);
+    m_grid.process_event(e);
+  }
+
   void reset_level() {
-    reset_grid();
+    m_grid.reset_grid();
     setup_bombs();
     update_numbers();
     build_atlas();
     render();
   }
 
-  void repaint() {
-    m_ticks++;
-    grid_renderer::repaint();
-  }
-
-  void resize(int w, int h) {
-    m_width = w;
-    m_height = h;
-  }
+  void repaint() { m_ticks++; }
 };
 
 extern "C" void casein_handle(const casein::event &e) {
-  static game_grid gg{&r};
+  static game_grid gg{};
   gg.process_event(e);
 
   switch (e.type()) {
   case casein::CREATE_WINDOW:
     gg.reset_level();
     break;
-  case casein::RESIZE_WINDOW: {
-    const auto &[w, h, scale, live] = *e.as<casein::events::resize_window>();
-    gg.resize(w, h);
-    break;
-  }
   case casein::KEY_DOWN:
     switch (*e.as<casein::events::key_down>()) {
     case casein::K_SPACE:
