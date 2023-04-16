@@ -116,29 +116,29 @@ public:
 };
 
 extern "C" void casein_handle(const casein::event &e) {
-  static game_grid r{};
-  r.process_event(e);
+  static game_grid gg{&r};
+  gg.process_event(e);
 
   switch (e.type()) {
   case casein::CREATE_WINDOW:
-    r.reset_level();
+    gg.reset_level();
     break;
   case casein::RESIZE_WINDOW: {
     const auto &[w, h, scale, live] = *e.as<casein::events::resize_window>();
-    r.resize(w, h);
+    gg.resize(w, h);
     break;
   }
   case casein::KEY_DOWN:
     switch (*e.as<casein::events::key_down>()) {
     case casein::K_SPACE:
-      r.reset_level();
+      gg.reset_level();
       break;
     default:
       break;
     }
     break;
   case casein::MOUSE_DOWN:
-    r.click();
+    gg.click();
     break;
   default:
     break;
