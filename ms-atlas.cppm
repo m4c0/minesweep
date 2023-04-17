@@ -5,6 +5,7 @@ struct cell {
   unsigned count;
   bool bomb;
   bool visible;
+  bool flagged;
 };
 
 namespace ms {
@@ -20,6 +21,7 @@ enum sprites {
   s_6,
   s_7,
   s_8,
+  s_flagged,
   sprite_count
 };
 struct atlas {
@@ -113,6 +115,14 @@ struct atlas {
                                                         ".  OOO :"
                                                         ".  OOO :"
                                                         ".      :"
+                                                        ".:::::::"
+                                                        ".......:" //
+                                                        ".      :"
+                                                        ". O*** :"
+                                                        ". O*** :"
+                                                        ". O    :"
+                                                        ". O    :"
+                                                        ".      :"
                                                         ".:::::::";
 
   void operator()(quack::u8_rgba *img) {
@@ -146,7 +156,7 @@ struct uv_filler {
 
   auto operator()(const cell &c) {
     if (!c.visible)
-      return uv(s_hidden);
+      return uv(c.flagged ? s_flagged : s_hidden);
 
     if (c.bomb)
       return uv(s_bomb);

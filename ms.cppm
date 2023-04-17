@@ -98,6 +98,14 @@ public:
     });
   }
 
+  void flag() {
+    m_grid.current_hover().consume([this](auto idx) {
+      auto &g = m_grid.at(idx);
+      g.flagged = !g.flagged;
+      render();
+    });
+  }
+
   void process_event(const casein::event &e) {
     m_r.process_event(e);
     m_grid.process_event(e);
@@ -140,15 +148,23 @@ extern "C" void casein_handle(const casein::event &e) {
     };
     break;
   }
-  case casein::GESTURE:
+  case casein::TOUCH_DOWN: {
+    const auto &md = *e.as<casein::events::touch_down>();
+    if (md.long_press) {
+      gg.flag();
+    }
+    break;
+  }
+  case casein::GESTURE: {
     switch (*e.as<casein::events::gesture>()) {
     case casein::G_TAP_1:
       gg.click();
       break;
     default:
       break;
-    }
+    };
     break;
+  }
   default:
     break;
   }
