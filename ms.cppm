@@ -131,8 +131,23 @@ extern "C" void casein_handle(const casein::event &e) {
       break;
     }
     break;
-  case casein::MOUSE_DOWN:
-    gg.click();
+  case casein::MOUSE_DOWN: {
+    const auto &md = *e.as<casein::events::mouse_down>();
+    switch (md.button) {
+    case 0:
+      gg.click();
+      break;
+    };
+    break;
+  }
+  case casein::GESTURE:
+    switch (*e.as<casein::events::gesture>()) {
+    case casein::G_TAP_1:
+      gg.click();
+      break;
+    default:
+      break;
+    }
     break;
   default:
     break;
