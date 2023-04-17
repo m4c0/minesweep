@@ -19,12 +19,12 @@ class game_grid {
     m_grid.fill_uv(uv_filler{});
     m_grid.fill_colour([](const auto &b) {
       if (!b.visible)
-        return quack::colour{};
+        return quack::colour{0, 0, 0, 1};
       if (b.bomb) {
         return quack::colour{0.3, 0, 0, 1};
       } else {
         float f = b.count / 8.0f;
-        return quack::colour{0, f, 0, 1};
+        return quack::colour{0, f * 0.3f, 0, 1};
       }
     });
   }

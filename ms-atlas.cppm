@@ -131,7 +131,7 @@ struct atlas {
         img[i] = {32, 32, 32, 255};
         break;
       case 'O':
-        img[i] = {64, 128, 32, 255};
+        img[i] = {128, 255, 64, 255};
         break;
       }
     }
