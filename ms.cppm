@@ -1,41 +1,57 @@
 #pragma leco app
+#pragma leco add_shader "ms.vert"
+#pragma leco add_shader "ms.frag"
+
 export module ms;
 import :atlas;
 import casein;
+import rng;
+import vee;
+import voo;
 
 using namespace ms;
 
 constexpr const auto grid_size = 36;
 constexpr const auto max_bombs = grid_size * 4;
+constexpr const auto cells = grid_size * grid_size;
 
-class game_grid {
-  quack::renderer m_r{1};
-  quack::grid_ilayout<grid_size, grid_size, cell> m_grid{&m_r};
-  unsigned m_ticks{};
+class grid {
+  cell m_cells[grid_size * grid_size]{};
 
-  static constexpr const auto cells = decltype(m_grid)::cells;
+public:
+  [[nodiscard]] constexpr auto &operator[](unsigned idx) {
+    return m_cells[idx];
+  }
+  [[nodiscard]] constexpr auto &at(unsigned x, unsigned y) {
+    return m_cells[y * grid_size + x];
+  }
+};
 
-  void render() {
-    m_grid.fill_uv(uv_filler{});
-    m_grid.fill_colour([](const auto &b) {
-      if (!b.visible)
-        return quack::colour{0, 0, 0, 1};
-      if (b.bomb) {
-        return quack::colour{0.3, 0, 0, 1};
-      } else {
-        float f = b.count / 8.0f;
-        return quack::colour{0, f * 0.3f, 0, 1};
-      }
-    });
+class thread : public voo::casein_thread {
+  grid m_cells{};
+
+  void render() { /*
+     m_grid.fill_uv(uv_filler{});
+     m_grid.fill_colour([](const auto &b) {
+       if (!b.visible)
+         return quack::colour{0, 0, 0, 1};
+       if (b.bomb) {
+         return quack::colour{0.3, 0, 0, 1};
+       } else {
+         float f = b.count / 8.0f;
+         return quack::colour{0, f * 0.3f, 0, 1};
+       }
+     });
+     */
   }
 
   void setup_bombs() {
     for (auto i = 0; i < max_bombs; i++) {
-      unsigned p = (m_ticks * 115249 ^ m_ticks * 331319) % cells;
-      while (m_grid.at(p).bomb) {
-        p = (++p * 60493) % cells;
+      unsigned p = rng::rand(cells);
+      while (m_cells[p].bomb) {
+        p = rng::rand(cells);
       }
-      m_grid.at(p).bomb = true;
+      m_cells[p].bomb = true;
     }
   }
 
@@ -47,8 +63,12 @@ class game_grid {
     }
   }
 
+  [[nodiscard]] constexpr auto &at(unsigned x, unsigned y) {
+    return m_cells.at(x, y);
+  }
+
   void update_numbers_at(unsigned x, unsigned y) {
-    if (m_grid.at(x, y).bomb)
+    if (at(x, y).bomb)
       return;
 
     for (auto dy = -1; dy <= 1; dy++) {
@@ -59,16 +79,17 @@ class game_grid {
         const auto nx = x + dx;
         if ((nx < 0) || (nx >= grid_size))
           continue;
-        if (m_grid.at(nx, ny).bomb)
-          m_grid.at(x, y).count++;
+        if (at(nx, ny).bomb)
+          at(x, y).count++;
       }
     }
   }
 
-  void build_atlas() { m_r.load_atlas(atlas::width, atlas::height, atlas{}); }
+  void build_atlas() { /*m_r.load_atlas(atlas::width, atlas::height, atlas{});*/
+  }
 
   void fill(unsigned x, unsigned y) {
-    auto &p = m_grid.at(x, y);
+    auto &p = at(x, y);
     if (p.visible)
       return;
 
@@ -89,72 +110,64 @@ class game_grid {
       }
     }
   }
-
-public:
   void click() {
+    /*
     m_grid.current_hover().consume([this](auto idx) {
       fill(idx % grid_size, idx / grid_size);
       render();
     });
+    */
   }
 
   void flag() {
+    /*
     m_grid.current_hover().consume([this](auto idx) {
       auto &g = m_grid.at(idx);
       g.flagged = !g.flagged;
       render();
     });
-  }
-
-  void process_event(const casein::event &e) {
-    m_r.process_event(e);
-    m_grid.process_event(e);
+    */
   }
 
   void reset_level() {
-    m_grid.reset_grid();
+    m_cells = {};
     setup_bombs();
     update_numbers();
     build_atlas();
     render();
   }
 
-  void repaint() { m_ticks++; }
-};
-
-class thread : public voo::casein_thread {
-  game_grid m_gg{};
-
 public:
   void create_window(const casein::events::create_window &e) override {
     casein_thread::create_window(e);
-    gg.reset_level();
+    rng::seed();
+    reset_level();
   }
   void key_down(const casein::events::key_down &e) override {
     switch (*e) {
     case casein::K_SPACE:
-      gg.reset_level();
+      reset_level();
       break;
     default:
     }
   }
   void mouse_down(const casein::events::mouse_down &e) override {
-    switch (e.button) {
+    switch (*e) {
     case casein::M_LEFT:
-      gg.click();
+      click();
       break;
     case casein::M_RIGHT:
-      gg.flag();
+      flag();
       break;
     }
   }
   void touch_down(const casein::events::touch_down &e) override {
-    if (e.long_press)
-      gg.flag();
+    if ((*e).long_press)
+      flag();
   }
   void gesture(const casein::events::gesture &e) override {
     if (*e == casein::G_TAP_1)
-      gg.click();
+      click();
   }
 
   void run() override {
@@ -173,8 +186,8 @@ public:
           .pipeline_layout = *pl,
           .render_pass = sw.render_pass(),
           .shaders{
-              voo::shader("poc.vert.spv").pipeline_vert_stage(),
-              voo::shader("poc.frag.spv").pipeline_frag_stage(),
+              voo::shader("ms.vert.spv").pipeline_vert_stage(),
+              voo::shader("ms.frag.spv").pipeline_frag_stage(),
           },
           .bindings{
               quad.vertex_input_bind(),
