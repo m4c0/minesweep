@@ -1,5 +1,4 @@
 export module ms:atlas;
-import quack;
 
 struct cell {
   unsigned count;
@@ -125,7 +124,7 @@ struct atlas {
                                                         ".      :"
                                                         ".:::::::";
 
-  void operator()(quack::u8_rgba *img) {
+  void operator()(auto *img) {
     for (auto i = 0; i < pixel_count; i++) {
       switch (pixels[i]) {
       case ' ':
@@ -148,10 +147,14 @@ struct atlas {
   }
 };
 
+struct uv {
+  float u0, v0;
+  float u1, v1;
+};
 struct uv_filler {
   static constexpr auto uv(unsigned n) {
     constexpr const auto h = 1.0f / static_cast<float>(sprite_count);
-    return quack::uv{{0, n * h}, {1, (n + 1) * h}};
+    return ms::uv{0, n * h, 1, (n + 1) * h};
   }
 
   auto operator()(const cell &c) {

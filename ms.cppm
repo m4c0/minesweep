@@ -1,7 +1,7 @@
+#pragma leco app
 export module ms;
 import :atlas;
 import casein;
-import quack;
 
 using namespace ms;
 
@@ -122,53 +122,82 @@ public:
   void repaint() { m_ticks++; }
 };
 
-extern "C" void casein_handle(const casein::event &e) {
-  static game_grid gg{};
-  gg.process_event(e);
+class thread : public voo::casein_thread {
+  game_grid m_gg{};
 
-  switch (e.type()) {
-  case casein::CREATE_WINDOW:
+public:
+  void create_window(const casein::events::create_window &e) override {
+    casein_thread::create_window(e);
     gg.reset_level();
-    break;
-  case casein::KEY_DOWN:
-    switch (*e.as<casein::events::key_down>()) {
+  }
+  void key_down(const casein::events::key_down &e) override {
+    switch (*e) {
     case casein::K_SPACE:
       gg.reset_level();
       break;
     default:
-      break;
     }
-    break;
-  case casein::MOUSE_DOWN: {
-    const auto &md = *e.as<casein::events::mouse_down>();
-    switch (md.button) {
+  }
+  void mouse_down(const casein::events::mouse_down &e) override {
+    switch (e.button) {
     case casein::M_LEFT:
       gg.click();
       break;
     case casein::M_RIGHT:
       gg.flag();
       break;
-    };
-    break;
-  }
-  case casein::TOUCH_DOWN: {
-    const auto &md = *e.as<casein::events::touch_down>();
-    if (md.long_press) {
-      gg.flag();
     }
-    break;
   }
-  case casein::GESTURE: {
-    switch (*e.as<casein::events::gesture>()) {
-    case casein::G_TAP_1:
+  void touch_down(const casein::events::touch_down &e) override {
+    if (e.long_press)
+      gg.flag();
+  }
+  void gesture(const casein::events::gesture &e) override {
+    if (*e == casein::G_TAP_1)
       gg.click();
-      break;
-    default:
-      break;
-    };
-    break;
   }
-  default:
-    break;
+
+  void run() override {
+    voo::device_and_queue dq{"winnipeg", native_ptr()};
+
+    voo::one_quad quad{dq};
+    vee::command_buffer cb =
+        vee::allocate_primary_command_buffer(dq.command_pool());
+
+    vee::pipeline_layout pl = vee::create_pipeline_layout();
+
+    while (!interrupted()) {
+      voo::swapchain_and_stuff sw{dq};
+
+      auto gp = vee::create_graphics_pipeline({
+          .pipeline_layout = *pl,
+          .render_pass = sw.render_pass(),
+          .shaders{
+              voo::shader("poc.vert.spv").pipeline_vert_stage(),
+              voo::shader("poc.frag.spv").pipeline_frag_stage(),
+          },
+          .bindings{
+              quad.vertex_input_bind(),
+          },
+          .attributes{
+              quad.vertex_attribute(0),
+          },
+      });
+
+      extent_loop([&] {
+        sw.acquire_next_image();
+        sw.one_time_submit(dq, cb, [&] {
+          auto scb = sw.cmd_render_pass(cb);
+          vee::cmd_bind_gr_pipeline(cb, *gp);
+          quad.run(scb, 0);
+        });
+        sw.queue_present(dq);
+      });
+    }
   }
+};
+
+extern "C" void casein_handle(const casein::event &e) {
+  static thread t{};
+  t.handle(e);
 }
