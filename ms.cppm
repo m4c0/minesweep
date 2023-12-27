@@ -22,10 +22,10 @@ static_assert(sizeof(upc) == 1 * sizeof(float));
 
 struct inst {
   float pos[2];
-  float uv[2];
+  uv uv;
   float bg[4];
 };
-static_assert(sizeof(inst) == 8 * sizeof(float));
+static_assert(sizeof(inst) == 10 * sizeof(float));
 
 class grid {
   cell m_cells[cells]{};
@@ -41,8 +41,10 @@ public:
   void load(inst *buf) {
     for (auto i = 0; i < cells; i++) {
       auto &b = buf[i];
+      auto uv = uv_filler::uv(m_cells[i]);
       b.pos[0] = i % grid_size;
       b.pos[1] = i / grid_size;
+      b.uv = uv;
     }
     /*
       m_grid.fill_uv(uv_filler{});
@@ -224,8 +226,8 @@ public:
           .attributes{
               quad.vertex_attribute(0),
               vee::vertex_attribute_vec2(1, 0),
-              vee::vertex_attribute_vec2(1, 2 * sizeof(float)),
-              vee::vertex_attribute_vec4(1, 4 * sizeof(float)),
+              vee::vertex_attribute_vec4(1, 2 * sizeof(float)),
+              vee::vertex_attribute_vec4(1, 6 * sizeof(float)),
           },
       });
 

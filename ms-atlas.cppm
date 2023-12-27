@@ -163,7 +163,7 @@ struct uv_filler {
     return ms::uv{0, n * h, 1, (n + 1) * h};
   }
 
-  auto operator()(const cell &c) {
+  static constexpr auto uv(const cell &c) {
     if (!c.visible)
       return uv(c.flagged ? s_flagged : s_hidden);
 
