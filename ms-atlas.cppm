@@ -1,13 +1,19 @@
 export module ms:atlas;
 
+namespace ms {
 struct cell {
   unsigned count;
   bool bomb;
   bool visible;
   bool flagged;
 };
+struct rgba {
+  unsigned char r;
+  unsigned char g;
+  unsigned char b;
+  unsigned char a;
+};
 
-namespace ms {
 enum sprites {
   s_bomb,
   s_empty,
@@ -124,7 +130,7 @@ struct atlas {
                                                         ".      :"
                                                         ".:::::::";
 
-  void operator()(auto *img) {
+  void operator()(rgba *img) {
     for (auto i = 0; i < pixel_count; i++) {
       switch (pixels[i]) {
       case ' ':

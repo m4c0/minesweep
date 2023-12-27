@@ -85,9 +85,6 @@ class thread : public voo::casein_thread {
     }
   }
 
-  void build_atlas() { /*m_r.load_atlas(atlas::width, atlas::height, atlas{});*/
-  }
-
   void fill(unsigned x, unsigned y) {
     auto &p = at(x, y);
     if (p.visible)
@@ -133,7 +130,6 @@ class thread : public voo::casein_thread {
     m_cells = {};
     setup_bombs();
     update_numbers();
-    build_atlas();
     render();
   }
 
@@ -174,10 +170,19 @@ public:
     voo::device_and_queue dq{"winnipeg", native_ptr()};
 
     voo::one_quad quad{dq};
-    vee::command_buffer cb =
-        vee::allocate_primary_command_buffer(dq.command_pool());
+    voo::h2l_image img{dq, atlas::width, atlas::height};
 
-    vee::pipeline_layout pl = vee::create_pipeline_layout();
+    auto cb = vee::allocate_primary_command_buffer(dq.command_pool());
+
+    auto dsl = vee::create_descriptor_set_layout({vee::dsl_fragment_sampler()});
+    auto dpool =
+        vee::create_descriptor_pool(1, {vee::combined_image_sampler()});
+    auto dset = vee::allocate_descriptor_set(*dpool, *dsl);
+
+    auto smp = vee::create_sampler(vee::nearest_sampler);
+    vee::update_descriptor_set(dset, 0, img.iv(), *smp);
+
+    auto pl = vee::create_pipeline_layout({*dsl});
 
     while (!interrupted()) {
       voo::swapchain_and_stuff sw{dq};
@@ -197,11 +202,16 @@ public:
           },
       });
 
+      atlas{}(static_cast<rgba *>(*(img.mapmem())));
+
       extent_loop([&] {
         sw.acquire_next_image();
-        sw.one_time_submit(dq, cb, [&] {
-          auto scb = sw.cmd_render_pass(cb);
-          vee::cmd_bind_gr_pipeline(cb, *gp);
+        sw.one_time_submit(dq, cb, [&](auto &pcb) {
+          img.run(pcb);
+
+          auto scb = sw.cmd_render_pass(pcb);
+          vee::cmd_bind_gr_pipeline(*scb, *gp);
+          vee::cmd_bind_descriptor_set(*scb, *pl, 0, dset);
           quad.run(scb, 0);
         });
         sw.queue_present(dq);
