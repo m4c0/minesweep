@@ -7,7 +7,7 @@ struct cell {
   bool visible;
   bool flagged;
 };
-struct rgba {
+struct rgba_u8 {
   unsigned char r;
   unsigned char g;
   unsigned char b;
@@ -130,7 +130,7 @@ struct atlas {
                                                         ".      :"
                                                         ".:::::::";
 
-  void operator()(rgba *img) {
+  void operator()(rgba_u8 *img) {
     for (auto i = 0; i < pixel_count; i++) {
       switch (pixels[i]) {
       case ' ':

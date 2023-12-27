@@ -20,10 +20,13 @@ struct upc {
 };
 static_assert(sizeof(upc) == 1 * sizeof(float));
 
+struct rgba {
+  float r, g, b, a;
+};
 struct inst {
   float pos[2];
   uv uv;
-  float bg[4];
+  rgba bg;
 };
 static_assert(sizeof(inst) == 10 * sizeof(float));
 
@@ -41,24 +44,23 @@ public:
   void load(inst *buf) {
     for (auto i = 0; i < cells; i++) {
       auto &b = buf[i];
-      auto uv = uv_filler::uv(m_cells[i]);
+      const auto &c = m_cells[i];
+
       b.pos[0] = i % grid_size;
       b.pos[1] = i / grid_size;
+
+      auto uv = uv_filler::uv(c);
       b.uv = uv;
+
+      if (!c.visible) {
+        b.bg = {0, 0, 0, 1};
+      } else if (c.bomb) {
+        b.bg = {0.3, 0, 0, 1};
+      } else {
+        float f = c.count / 8.0f;
+        b.bg = {0, f * 0.3f, 0, 1};
+      }
     }
-    /*
-      m_grid.fill_uv(uv_filler{});
-      m_grid.fill_colour([](const auto &b) {
-        if (!b.visible)
-          return quack::colour{0, 0, 0, 1};
-        if (b.bomb) {
-          return quack::colour{0.3, 0, 0, 1};
-        } else {
-          float f = b.count / 8.0f;
-          return quack::colour{0, f * 0.3f, 0, 1};
-        }
-      });
-      */
   }
 };
 
@@ -231,7 +233,7 @@ public:
           },
       });
 
-      atlas{}(static_cast<rgba *>(*(img.mapmem())));
+      atlas{}(static_cast<rgba_u8 *>(*(img.mapmem())));
       upc pc{.grid_size = grid_size};
 
       extent_loop([&] {
