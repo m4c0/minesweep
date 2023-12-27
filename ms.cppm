@@ -16,7 +16,7 @@ constexpr const auto max_bombs = grid_size * 4;
 constexpr const auto cells = grid_size * grid_size;
 
 struct upc {
-  float grid_size = grid_size;
+  float grid_size;
 };
 static_assert(sizeof(upc) == 1 * sizeof(float));
 
@@ -28,7 +28,7 @@ struct inst {
 static_assert(sizeof(inst) == 8 * sizeof(float));
 
 class grid {
-  cell m_cells[grid_size * grid_size]{};
+  cell m_cells[cells]{};
 
 public:
   [[nodiscard]] constexpr auto &operator[](unsigned idx) {
@@ -37,25 +37,34 @@ public:
   [[nodiscard]] constexpr auto &at(unsigned x, unsigned y) {
     return m_cells[y * grid_size + x];
   }
+
+  void load(inst *buf) {
+    for (auto i = 0; i < cells; i++) {
+      auto &b = buf[i];
+      b.pos[0] = i % grid_size;
+      b.pos[1] = i / grid_size;
+    }
+    /*
+      m_grid.fill_uv(uv_filler{});
+      m_grid.fill_colour([](const auto &b) {
+        if (!b.visible)
+          return quack::colour{0, 0, 0, 1};
+        if (b.bomb) {
+          return quack::colour{0.3, 0, 0, 1};
+        } else {
+          float f = b.count / 8.0f;
+          return quack::colour{0, f * 0.3f, 0, 1};
+        }
+      });
+      */
+  }
 };
 
 class thread : public voo::casein_thread {
   grid m_cells{};
+  volatile bool m_render{};
 
-  void render() { /*
-     m_grid.fill_uv(uv_filler{});
-     m_grid.fill_colour([](const auto &b) {
-       if (!b.visible)
-         return quack::colour{0, 0, 0, 1};
-       if (b.bomb) {
-         return quack::colour{0.3, 0, 0, 1};
-       } else {
-         float f = b.count / 8.0f;
-         return quack::colour{0, f * 0.3f, 0, 1};
-       }
-     });
-     */
-  }
+  void render() { m_render = true; }
 
   void setup_bombs() {
     for (auto i = 0; i < max_bombs; i++) {
@@ -196,7 +205,7 @@ public:
     vee::update_descriptor_set(dset, 0, img.iv(), *smp);
 
     auto pl = vee::create_pipeline_layout(
-        {*dsl}, {vee::vert_frag_push_constant_range<upc>()});
+        {*dsl}, {vee::vertex_push_constant_range<upc>()});
 
     while (!interrupted()) {
       voo::swapchain_and_stuff sw{dq};
@@ -210,7 +219,7 @@ public:
           },
           .bindings{
               quad.vertex_input_bind(),
-              vee::vertex_input_bind(sizeof(inst)),
+              vee::vertex_input_bind_per_instance(sizeof(inst)),
           },
           .attributes{
               quad.vertex_attribute(0),
@@ -221,9 +230,14 @@ public:
       });
 
       atlas{}(static_cast<rgba *>(*(img.mapmem())));
-      upc pc{};
+      upc pc{.grid_size = grid_size};
 
       extent_loop([&] {
+        if (m_render) {
+          m_cells.load(static_cast<inst *>(*(insts.mapmem())));
+          m_render = false;
+        }
+
         sw.acquire_next_image();
         sw.one_time_submit(dq, cb, [&](auto &pcb) {
           img.run(pcb);

@@ -8,5 +8,6 @@ layout(location = 0) in vec2 frag_coord;
 
 void main() {
   vec2 uv = frag_coord * 0.5 + 0.5;
-  frag_colour = texture(tex, uv);
+  vec4 rgba = texture(tex, uv);
+  frag_colour = vec4(1, rgba.gba);
 }
