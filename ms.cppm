@@ -15,6 +15,18 @@ constexpr const auto grid_size = 36;
 constexpr const auto max_bombs = grid_size * 4;
 constexpr const auto cells = grid_size * grid_size;
 
+struct upc {
+  float grid_size = grid_size;
+};
+static_assert(sizeof(upc) == 1 * sizeof(float));
+
+struct inst {
+  float pos[2];
+  float uv[2];
+  float bg[4];
+};
+static_assert(sizeof(inst) == 8 * sizeof(float));
+
 class grid {
   cell m_cells[grid_size * grid_size]{};
 
@@ -171,6 +183,7 @@ public:
 
     voo::one_quad quad{dq};
     voo::h2l_image img{dq, atlas::width, atlas::height};
+    voo::h2l_buffer insts{dq, sizeof(inst) * cells};
 
     auto cb = vee::allocate_primary_command_buffer(dq.command_pool());
 
@@ -182,7 +195,8 @@ public:
     auto smp = vee::create_sampler(vee::nearest_sampler);
     vee::update_descriptor_set(dset, 0, img.iv(), *smp);
 
-    auto pl = vee::create_pipeline_layout({*dsl});
+    auto pl = vee::create_pipeline_layout(
+        {*dsl}, {vee::vert_frag_push_constant_range<upc>()});
 
     while (!interrupted()) {
       voo::swapchain_and_stuff sw{dq};
@@ -196,23 +210,31 @@ public:
           },
           .bindings{
               quad.vertex_input_bind(),
+              vee::vertex_input_bind(sizeof(inst)),
           },
           .attributes{
               quad.vertex_attribute(0),
+              vee::vertex_attribute_vec2(1, 0),
+              vee::vertex_attribute_vec2(1, 2 * sizeof(float)),
+              vee::vertex_attribute_vec4(1, 4 * sizeof(float)),
           },
       });
 
       atlas{}(static_cast<rgba *>(*(img.mapmem())));
+      upc pc{};
 
       extent_loop([&] {
         sw.acquire_next_image();
         sw.one_time_submit(dq, cb, [&](auto &pcb) {
           img.run(pcb);
+          insts.run(pcb);
 
           auto scb = sw.cmd_render_pass(pcb);
           vee::cmd_bind_gr_pipeline(*scb, *gp);
+          vee::cmd_push_vert_frag_constants(*scb, *pl, &pc);
           vee::cmd_bind_descriptor_set(*scb, *pl, 0, dset);
-          quad.run(scb, 0);
+          vee::cmd_bind_vertex_buffers(*scb, 1, insts.buffer());
+          quad.run(scb, 0, cells);
         });
         sw.queue_present(dq);
       });
