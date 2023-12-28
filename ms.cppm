@@ -67,8 +67,14 @@ public:
   }
 };
 
+struct size {
+  float w;
+  float h;
+};
+
 class thread : public voo::casein_thread {
   grid m_cells{};
+  volatile size m_screen_size{};
   volatile bool m_render{};
 
   void render() { m_render = true; }
@@ -185,6 +191,11 @@ public:
       break;
     }
   }
+  void resize_window(const casein::events::resize_window &e) override {
+    casein_thread::resize_window(e);
+    m_screen_size.w = (*e).width;
+    m_screen_size.h = (*e).height;
+  }
   void touch_down(const casein::events::touch_down &e) override {
     if ((*e).long_press)
       flag();
@@ -245,8 +256,14 @@ public:
           m_render = false;
         }
         const auto m = grid_size * 0.1;
-        pc.area_x = pc.area_y = m;
-        pc.area_w = pc.area_h = grid_size + m * 2;
+        auto asp = m_screen_size.w / m_screen_size.h;
+        auto aw = asp > 1 ? asp : 1;
+        auto ah = asp > 1 ? 1 : asp;
+
+        pc.area_w = (grid_size + m * 2) * aw;
+        pc.area_h = (grid_size + m * 2) / ah;
+        pc.area_x = (pc.area_w - grid_size) / 2;
+        pc.area_y = (pc.area_h - grid_size) / 2;
 
         sw.acquire_next_image();
         sw.one_time_submit(dq, cb, [&](auto &pcb) {
