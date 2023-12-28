@@ -16,9 +16,12 @@ constexpr const auto max_bombs = grid_size * 4;
 constexpr const auto cells = grid_size * grid_size;
 
 struct upc {
-  float grid_size;
+  float area_x;
+  float area_y;
+  float area_w;
+  float area_h;
 };
-static_assert(sizeof(upc) == 1 * sizeof(float));
+static_assert(sizeof(upc) == 4 * sizeof(float));
 
 struct rgba {
   float r, g, b, a;
@@ -234,13 +237,16 @@ public:
       });
 
       atlas{}(static_cast<rgba_u8 *>(*(img.mapmem())));
-      upc pc{.grid_size = grid_size};
+      upc pc{};
 
       extent_loop([&] {
         if (m_render) {
           m_cells.load(static_cast<inst *>(*(insts.mapmem())));
           m_render = false;
         }
+        const auto m = grid_size * 0.1;
+        pc.area_x = pc.area_y = m;
+        pc.area_w = pc.area_h = grid_size + m * 2;
 
         sw.acquire_next_image();
         sw.one_time_submit(dq, cb, [&](auto &pcb) {
