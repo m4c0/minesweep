@@ -20,8 +20,10 @@ struct upc {
   float area_y;
   float area_w;
   float area_h;
+  float sel_x{-1};
+  float sel_y{-1};
 };
-static_assert(sizeof(upc) == 4 * sizeof(float));
+static_assert(sizeof(upc) == 6 * sizeof(float));
 
 struct rgba {
   float r, g, b, a;

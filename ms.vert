@@ -2,6 +2,7 @@
 
 layout(push_constant) uniform upc {
   vec4 client_area;
+  vec2 hover;
 } pc;
 
 layout(location = 0) in vec2 position;
@@ -17,5 +18,5 @@ void main() {
   p = 2.0 * p - 1.0;
   gl_Position = vec4(p, 0, 1);
   frag_uv = mix(uv.xy, uv.zw, position);
-  frag_bg = colour;
+  frag_bg = i_pos == pc.hover ? vec4(1) : colour;
 }
