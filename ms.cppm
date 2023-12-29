@@ -69,6 +69,10 @@ public:
   }
 };
 
+struct point {
+  float x;
+  float y;
+};
 struct size {
   float w;
   float h;
@@ -77,6 +81,7 @@ struct size {
 class thread : public voo::casein_thread {
   grid m_cells{};
   volatile size m_screen_size{};
+  volatile point m_mouse_pos{};
   volatile bool m_render{};
 
   void render() { m_render = true; }
@@ -183,6 +188,10 @@ public:
     default:
     }
   }
+  void mouse_move(const casein::events::mouse_move &e) override {
+    m_mouse_pos.x = (*e).x;
+    m_mouse_pos.y = (*e).y;
+  }
   void mouse_down(const casein::events::mouse_down &e) override {
     switch (*e) {
     case casein::M_LEFT:
@@ -266,6 +275,11 @@ public:
         pc.area_h = (grid_size + m * 2) / ah;
         pc.area_x = (pc.area_w - grid_size) / 2;
         pc.area_y = (pc.area_h - grid_size) / 2;
+
+        pc.sel_x =
+            static_cast<int>(grid_size * m_mouse_pos.x / m_screen_size.w);
+        pc.sel_y =
+            static_cast<int>(grid_size * m_mouse_pos.y / m_screen_size.h);
 
         sw.acquire_next_image();
         sw.one_time_submit(dq, cb, [&](auto &pcb) {
