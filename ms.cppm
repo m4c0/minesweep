@@ -276,10 +276,10 @@ public:
         pc.area_x = (pc.area_w - grid_size) / 2;
         pc.area_y = (pc.area_h - grid_size) / 2;
 
-        pc.sel_x =
-            static_cast<int>(grid_size * m_mouse_pos.x / m_screen_size.w);
-        pc.sel_y =
-            static_cast<int>(grid_size * m_mouse_pos.y / m_screen_size.h);
+        pc.sel_x = static_cast<int>(-pc.area_x + pc.area_w * m_mouse_pos.x /
+                                                     m_screen_size.w);
+        pc.sel_y = static_cast<int>(-pc.area_y + pc.area_h * m_mouse_pos.y /
+                                                     m_screen_size.h);
 
         sw.acquire_next_image();
         sw.one_time_submit(dq, cb, [&](auto &pcb) {
