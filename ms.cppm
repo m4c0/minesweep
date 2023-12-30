@@ -71,16 +71,6 @@ class grid {
     }
   }
 
-public:
-  grid() : m_cells{} {
-    setup_bombs();
-    update_numbers();
-  }
-
-  [[nodiscard]] constexpr cell &at(unsigned x, unsigned y) {
-    return m_cells[y * grid_size + x];
-  }
-
   void fill(unsigned x, unsigned y) {
     auto &p = at(x, y);
     if (p.visible)
@@ -101,6 +91,29 @@ public:
           continue;
         fill(nx, ny);
       }
+    }
+  }
+
+public:
+  grid() : m_cells{} {
+    setup_bombs();
+    update_numbers();
+  }
+
+  [[nodiscard]] constexpr cell &at(unsigned x, unsigned y) {
+    return m_cells[y * grid_size + x];
+  }
+
+  void click(int x, int y) {
+    if (x >= 0 && y >= 0 && x < grid_size && y < grid_size) {
+      fill(x, y);
+    }
+  }
+
+  void flag(int x, int y) {
+    if (x >= 0 && y >= 0 && x < grid_size && y < grid_size) {
+      auto &g = at(x, y);
+      g.flagged = !g.flagged;
     }
   }
 
@@ -146,22 +159,15 @@ class thread : public voo::casein_thread {
   void render() { m_vols->render = true; }
 
   void click() {
-    auto pc = push_consts();
-    auto [x, y] = pc.sel();
-    if (x >= 0 && y >= 0 && x < grid_size && y < grid_size) {
-      m_cells.fill(x, y);
-      render();
-    }
+    auto [x, y] = push_consts().sel();
+    m_cells.click(x, y);
+    render();
   }
 
   void flag() {
-    auto pc = push_consts();
-    auto [x, y] = pc.sel();
-    if (x >= 0 && y >= 0 && x < grid_size && y < grid_size) {
-      auto &g = m_cells.at(x, y);
-      g.flagged = !g.flagged;
-      render();
-    }
+    auto [x, y] = push_consts().sel();
+    m_cells.flag(x, y);
+    render();
   }
 
   void reset_level() {
