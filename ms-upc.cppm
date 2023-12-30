@@ -23,6 +23,8 @@ public:
 
     m_sel = dotz::floor(-m_area_pos + m_area_sz * mouse / scr_size);
   }
+
+  [[nodiscard]] constexpr auto sel() const noexcept { return m_sel; }
 };
 static_assert(sizeof(upc) == 6 * sizeof(float));
 } // namespace ms

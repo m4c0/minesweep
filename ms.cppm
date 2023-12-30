@@ -35,12 +35,76 @@ static_assert(sizeof(inst) == 10 * sizeof(float));
 class grid {
   cell m_cells[cells]{};
 
+  void setup_bombs() {
+    for (auto i = 0; i < max_bombs; i++) {
+      unsigned p = rng::rand(cells);
+      while (m_cells[p].bomb) {
+        p = rng::rand(cells);
+      }
+      m_cells[p].bomb = true;
+    }
+  }
+
+  void update_numbers() {
+    for (auto y = 0; y < grid_size; y++) {
+      for (auto x = 0; x < grid_size; x++) {
+        update_numbers_at(x, y);
+      }
+    }
+  }
+
+  void update_numbers_at(unsigned x, unsigned y) {
+    if (at(x, y).bomb)
+      return;
+
+    for (auto dy = -1; dy <= 1; dy++) {
+      const auto ny = y + dy;
+      if ((ny < 0) || (ny >= grid_size))
+        continue;
+      for (auto dx = -1; dx <= 1; dx++) {
+        const auto nx = x + dx;
+        if ((nx < 0) || (nx >= grid_size))
+          continue;
+        if (at(nx, ny).bomb)
+          at(x, y).count++;
+      }
+    }
+  }
+
 public:
+  grid() : m_cells{} {
+    setup_bombs();
+    update_numbers();
+  }
+
   [[nodiscard]] constexpr auto &operator[](unsigned idx) {
     return m_cells[idx];
   }
-  [[nodiscard]] constexpr auto &at(unsigned x, unsigned y) {
+  [[nodiscard]] constexpr cell &at(unsigned x, unsigned y) {
     return m_cells[y * grid_size + x];
+  }
+
+  void fill(unsigned x, unsigned y) {
+    auto &p = at(x, y);
+    if (p.visible)
+      return;
+
+    p.visible = true;
+
+    if (p.count != 0 || p.bomb)
+      return;
+
+    for (auto dx = -1; dx <= 1; dx++) {
+      auto nx = x + dx;
+      if (nx < 0 || nx >= grid_size)
+        continue;
+      for (auto dy = -1; dy <= 1; dy++) {
+        auto ny = y + dy;
+        if (ny < 0 || ny >= grid_size)
+          continue;
+        fill(nx, ny);
+      }
+    }
   }
 
   void load(inst *buf) {
@@ -76,77 +140,21 @@ class thread : public voo::casein_thread {
   grid m_cells{};
   hai::uptr<volatile vol> m_vols{new vol{}};
 
+  [[nodiscard]] upc push_consts() {
+    upc res{};
+    res.update(grid_size, _(m_vols->mouse_pos), _(m_vols->screen_size));
+    return res;
+  }
+
   void render() { m_vols->render = true; }
 
-  void setup_bombs() {
-    for (auto i = 0; i < max_bombs; i++) {
-      unsigned p = rng::rand(cells);
-      while (m_cells[p].bomb) {
-        p = rng::rand(cells);
-      }
-      m_cells[p].bomb = true;
-    }
-  }
-
-  void update_numbers() {
-    for (auto y = 0; y < grid_size; y++) {
-      for (auto x = 0; x < grid_size; x++) {
-        update_numbers_at(x, y);
-      }
-    }
-  }
-
-  [[nodiscard]] constexpr auto &at(unsigned x, unsigned y) {
-    return m_cells.at(x, y);
-  }
-
-  void update_numbers_at(unsigned x, unsigned y) {
-    if (at(x, y).bomb)
-      return;
-
-    for (auto dy = -1; dy <= 1; dy++) {
-      const auto ny = y + dy;
-      if ((ny < 0) || (ny >= grid_size))
-        continue;
-      for (auto dx = -1; dx <= 1; dx++) {
-        const auto nx = x + dx;
-        if ((nx < 0) || (nx >= grid_size))
-          continue;
-        if (at(nx, ny).bomb)
-          at(x, y).count++;
-      }
-    }
-  }
-
-  void fill(unsigned x, unsigned y) {
-    auto &p = at(x, y);
-    if (p.visible)
-      return;
-
-    p.visible = true;
-
-    if (p.count != 0 || p.bomb)
-      return;
-
-    for (auto dx = -1; dx <= 1; dx++) {
-      auto nx = x + dx;
-      if (nx < 0 || nx >= grid_size)
-        continue;
-      for (auto dy = -1; dy <= 1; dy++) {
-        auto ny = y + dy;
-        if (ny < 0 || ny >= grid_size)
-          continue;
-        fill(nx, ny);
-      }
-    }
-  }
   void click() {
-    /*
-    m_grid.current_hover().consume([this](auto idx) {
-      fill(idx % grid_size, idx / grid_size);
+    auto pc = push_consts();
+    auto [x, y] = pc.sel();
+    if (x >= 0 && y >= 0 && x < grid_size && y < grid_size) {
+      m_cells.fill(x, y);
       render();
-    });
-    */
+    }
   }
 
   void flag() {
@@ -161,8 +169,6 @@ class thread : public voo::casein_thread {
 
   void reset_level() {
     m_cells = {};
-    setup_bombs();
-    update_numbers();
     render();
   }
 
@@ -258,7 +264,7 @@ public:
           m_cells.load(static_cast<inst *>(*(insts.mapmem())));
           m_vols->render = false;
         }
-        pc.update(grid_size, _(m_vols->mouse_pos), _(m_vols->screen_size));
+        pc = push_consts();
 
         sw.acquire_next_image();
         sw.one_time_submit(dq, cb, [&](auto &pcb) {
