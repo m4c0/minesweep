@@ -4,6 +4,7 @@
 
 export module ms;
 import :atlas;
+import :upc;
 import casein;
 import dotz;
 import rng;
@@ -19,13 +20,6 @@ point _(volatile point &p) noexcept { return {p.x, p.y}; }
 constexpr const auto grid_size = 36;
 constexpr const auto max_bombs = grid_size * 4;
 constexpr const auto cells = grid_size * grid_size;
-
-struct upc {
-  point area_pos;
-  point area_sz;
-  point sel{-1, -1};
-};
-static_assert(sizeof(upc) == 6 * sizeof(float));
 
 struct rgba {
   float r, g, b, a;
@@ -259,18 +253,7 @@ public:
           m_cells.load(static_cast<inst *>(*(insts.mapmem())));
           m_render = false;
         }
-        const auto m = grid_size * 0.1;
-        auto asp = m_screen_size.x / m_screen_size.y;
-        auto aw = asp > 1 ? asp : 1;
-        auto ah = asp > 1 ? 1 : asp;
-
-        pc.area_sz = point{grid_size} + m * 2;
-        pc.area_sz.x *= aw;
-        pc.area_sz.y /= ah;
-        pc.area_pos = (pc.area_sz - grid_size) / 2;
-
-        pc.sel = dotz::floor(-pc.area_pos +
-                             pc.area_sz * _(m_mouse_pos) / _(m_screen_size));
+        pc.update(grid_size, _(m_mouse_pos), _(m_screen_size));
 
         sw.acquire_next_image();
         sw.one_time_submit(dq, cb, [&](auto &pcb) {
