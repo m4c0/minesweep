@@ -77,9 +77,6 @@ public:
     update_numbers();
   }
 
-  [[nodiscard]] constexpr auto &operator[](unsigned idx) {
-    return m_cells[idx];
-  }
   [[nodiscard]] constexpr cell &at(unsigned x, unsigned y) {
     return m_cells[y * grid_size + x];
   }
@@ -158,13 +155,13 @@ class thread : public voo::casein_thread {
   }
 
   void flag() {
-    /*
-    m_grid.current_hover().consume([this](auto idx) {
-      auto &g = m_grid.at(idx);
+    auto pc = push_consts();
+    auto [x, y] = pc.sel();
+    if (x >= 0 && y >= 0 && x < grid_size && y < grid_size) {
+      auto &g = m_cells.at(x, y);
       g.flagged = !g.flagged;
       render();
-    });
-    */
+    }
   }
 
   void reset_level() {
