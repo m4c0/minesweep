@@ -14,6 +14,8 @@ using namespace ms;
 
 using point = dotz::vec2;
 
+point _(volatile point &p) noexcept { return {p.x, p.y}; }
+
 constexpr const auto grid_size = 36;
 constexpr const auto max_bombs = grid_size * 4;
 constexpr const auto cells = grid_size * grid_size;
@@ -262,15 +264,13 @@ public:
         auto aw = asp > 1 ? asp : 1;
         auto ah = asp > 1 ? 1 : asp;
 
-        pc.area_sz.x = (grid_size + m * 2) * aw;
-        pc.area_sz.y = (grid_size + m * 2) / ah;
-        pc.area_pos.x = (pc.area_sz.x - grid_size) / 2;
-        pc.area_pos.y = (pc.area_sz.y - grid_size) / 2;
+        pc.area_sz = point{grid_size} + m * 2;
+        pc.area_sz.x *= aw;
+        pc.area_sz.y /= ah;
+        pc.area_pos = (pc.area_sz - grid_size) / 2;
 
-        pc.sel.x = static_cast<int>(
-            -pc.area_pos.x + pc.area_sz.x * m_mouse_pos.x / m_screen_size.x);
-        pc.sel.y = static_cast<int>(
-            -pc.area_pos.y + pc.area_sz.y * m_mouse_pos.y / m_screen_size.y);
+        pc.sel = dotz::floor(-pc.area_pos +
+                             pc.area_sz * _(m_mouse_pos) / _(m_screen_size));
 
         sw.acquire_next_image();
         sw.one_time_submit(dq, cb, [&](auto &pcb) {
