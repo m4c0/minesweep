@@ -7,6 +7,7 @@ import :atlas;
 import :upc;
 import casein;
 import dotz;
+import hai;
 import rng;
 import vee;
 import voo;
@@ -65,13 +66,17 @@ public:
   }
 };
 
+struct vol {
+  point screen_size{};
+  point mouse_pos{};
+  bool render{};
+};
+
 class thread : public voo::casein_thread {
   grid m_cells{};
-  volatile point m_screen_size{};
-  volatile point m_mouse_pos{};
-  volatile bool m_render{};
+  hai::uptr<volatile vol> m_vols{new vol{}};
 
-  void render() { m_render = true; }
+  void render() { m_vols->render = true; }
 
   void setup_bombs() {
     for (auto i = 0; i < max_bombs; i++) {
@@ -176,8 +181,8 @@ public:
     }
   }
   void mouse_move(const casein::events::mouse_move &e) override {
-    m_mouse_pos.x = (*e).x;
-    m_mouse_pos.y = (*e).y;
+    m_vols->mouse_pos.x = (*e).x;
+    m_vols->mouse_pos.y = (*e).y;
   }
   void mouse_down(const casein::events::mouse_down &e) override {
     switch (*e) {
@@ -191,8 +196,8 @@ public:
   }
   void resize_window(const casein::events::resize_window &e) override {
     casein_thread::resize_window(e);
-    m_screen_size.x = (*e).width;
-    m_screen_size.y = (*e).height;
+    m_vols->screen_size.x = (*e).width;
+    m_vols->screen_size.y = (*e).height;
   }
   void touch_down(const casein::events::touch_down &e) override {
     if ((*e).long_press)
@@ -249,11 +254,11 @@ public:
       upc pc{};
 
       extent_loop([&] {
-        if (m_render) {
+        if (m_vols->render) {
           m_cells.load(static_cast<inst *>(*(insts.mapmem())));
-          m_render = false;
+          m_vols->render = false;
         }
-        pc.update(grid_size, _(m_mouse_pos), _(m_screen_size));
+        pc.update(grid_size, _(m_vols->mouse_pos), _(m_vols->screen_size));
 
         sw.acquire_next_image();
         sw.one_time_submit(dq, cb, [&](auto &pcb) {
