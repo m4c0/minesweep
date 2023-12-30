@@ -5,23 +5,23 @@
 export module ms;
 import :atlas;
 import casein;
+import dotz;
 import rng;
 import vee;
 import voo;
 
 using namespace ms;
 
+using point = dotz::vec2;
+
 constexpr const auto grid_size = 36;
 constexpr const auto max_bombs = grid_size * 4;
 constexpr const auto cells = grid_size * grid_size;
 
 struct upc {
-  float area_x;
-  float area_y;
-  float area_w;
-  float area_h;
-  float sel_x{-1};
-  float sel_y{-1};
+  point area_pos;
+  point area_sz;
+  point sel{-1, -1};
 };
 static_assert(sizeof(upc) == 6 * sizeof(float));
 
@@ -69,18 +69,9 @@ public:
   }
 };
 
-struct point {
-  float x;
-  float y;
-};
-struct size {
-  float w;
-  float h;
-};
-
 class thread : public voo::casein_thread {
   grid m_cells{};
-  volatile size m_screen_size{};
+  volatile point m_screen_size{};
   volatile point m_mouse_pos{};
   volatile bool m_render{};
 
@@ -204,8 +195,8 @@ public:
   }
   void resize_window(const casein::events::resize_window &e) override {
     casein_thread::resize_window(e);
-    m_screen_size.w = (*e).width;
-    m_screen_size.h = (*e).height;
+    m_screen_size.x = (*e).width;
+    m_screen_size.y = (*e).height;
   }
   void touch_down(const casein::events::touch_down &e) override {
     if ((*e).long_press)
@@ -267,19 +258,19 @@ public:
           m_render = false;
         }
         const auto m = grid_size * 0.1;
-        auto asp = m_screen_size.w / m_screen_size.h;
+        auto asp = m_screen_size.x / m_screen_size.y;
         auto aw = asp > 1 ? asp : 1;
         auto ah = asp > 1 ? 1 : asp;
 
-        pc.area_w = (grid_size + m * 2) * aw;
-        pc.area_h = (grid_size + m * 2) / ah;
-        pc.area_x = (pc.area_w - grid_size) / 2;
-        pc.area_y = (pc.area_h - grid_size) / 2;
+        pc.area_sz.x = (grid_size + m * 2) * aw;
+        pc.area_sz.y = (grid_size + m * 2) / ah;
+        pc.area_pos.x = (pc.area_sz.x - grid_size) / 2;
+        pc.area_pos.y = (pc.area_sz.y - grid_size) / 2;
 
-        pc.sel_x = static_cast<int>(-pc.area_x + pc.area_w * m_mouse_pos.x /
-                                                     m_screen_size.w);
-        pc.sel_y = static_cast<int>(-pc.area_y + pc.area_h * m_mouse_pos.y /
-                                                     m_screen_size.h);
+        pc.sel.x = static_cast<int>(
+            -pc.area_pos.x + pc.area_sz.x * m_mouse_pos.x / m_screen_size.x);
+        pc.sel.y = static_cast<int>(
+            -pc.area_pos.y + pc.area_sz.y * m_mouse_pos.y / m_screen_size.y);
 
         sw.acquire_next_image();
         sw.one_time_submit(dq, cb, [&](auto &pcb) {
