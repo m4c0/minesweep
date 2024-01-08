@@ -117,6 +117,7 @@ public:
     voo::h2l_buffer insts{dq, ms::instance_buf_size};
 
     auto cb = vee::allocate_primary_command_buffer(dq.command_pool());
+    auto cb2 = vee::allocate_primary_command_buffer(dq.command_pool());
 
     auto dsl = vee::create_descriptor_set_layout({vee::dsl_fragment_sampler()});
     auto dpool =
@@ -154,15 +155,16 @@ public:
       ms::atlas{}(static_cast<ms::rgba_u8 *>(*(img.mapmem())));
 
       extent_loop([&] {
+        sw.acquire_next_image();
+
         if (m_cells != nullptr) {
           m_cells->load(static_cast<ms::inst *>(*(insts.mapmem())));
           m_cells = nullptr;
         }
 
-        sw.acquire_next_image();
+        insts.submit(cb2, dq.queue());
         sw.one_time_submit(dq, cb, [&](auto &pcb) {
           img.run(pcb);
-          insts.run(pcb);
 
           auto scb = sw.cmd_render_pass(pcb);
           vee::cmd_bind_gr_pipeline(*scb, *gp);
