@@ -13,7 +13,27 @@ import voo;
 
 using point = dotz::vec2;
 
-ms::upc g_pc{};
+class pc_handler : public casein::handler {
+  point m_screen_size{};
+  point m_mouse_pos{};
+  ms::upc m_pc{};
+
+public:
+  [[nodiscard]] constexpr const auto *operator*() const noexcept {
+    return &m_pc;
+  }
+
+  void mouse_move(const casein::events::mouse_move &e) override {
+    m_mouse_pos.x = (*e).x;
+    m_mouse_pos.y = (*e).y;
+    m_pc.update(ms::grid_size, m_mouse_pos, m_screen_size);
+  }
+  void resize_window(const casein::events::resize_window &e) override {
+    m_screen_size.x = (*e).width;
+    m_screen_size.y = (*e).height;
+    m_pc.update(ms::grid_size, m_mouse_pos, m_screen_size);
+  }
+};
 
 class casein_handler : public casein::handler {
   point m_screen_size{};
@@ -69,7 +89,6 @@ public:
   void mouse_move(const casein::events::mouse_move &e) override {
     m_mouse_pos.x = (*e).x;
     m_mouse_pos.y = (*e).y;
-    g_pc = push_consts();
   }
   void mouse_down(const casein::events::mouse_down &e) override {
     switch (*e) {
@@ -84,7 +103,6 @@ public:
   void resize_window(const casein::events::resize_window &e) override {
     m_screen_size.x = (*e).width;
     m_screen_size.y = (*e).height;
-    g_pc = push_consts();
   }
   void touch_down(const casein::events::touch_down &e) override {
     if ((*e).long_press)
@@ -98,9 +116,11 @@ public:
 
 class thread : public voo::casein_thread {
   const ms::grid *m_cells;
+  const ms::upc *m_pc;
 
 public:
   void load(const ms::grid *m) { m_cells = m; }
+  void set_pc(const ms::upc *m) { m_pc = m; }
 
   void run() override {
     voo::device_and_queue dq{"minesweep", native_ptr()};
@@ -159,7 +179,7 @@ public:
 
           auto scb = sw.cmd_render_pass(pcb);
           vee::cmd_bind_gr_pipeline(*scb, *gp);
-          vee::cmd_push_vertex_constants(*scb, *pl, &g_pc);
+          vee::cmd_push_vertex_constants(*scb, *pl, m_pc);
           vee::cmd_bind_descriptor_set(*scb, *pl, 0, dset);
           vee::cmd_bind_vertex_buffers(*scb, 1, insts.buffer());
           quad.run(scb, 0, ms::cells);
@@ -173,9 +193,13 @@ public:
 extern "C" void casein_handle(const casein::event &e) {
   static thread t{};
   static casein_handler ch{};
-  t.handle(e);
+  static pc_handler pc{};
   ch.handle(e);
+  pc.handle(e);
+
+  t.set_pc(*pc);
   if (ch.dirty()) {
     t.load(ch.cells());
   }
+  t.handle(e);
 }
