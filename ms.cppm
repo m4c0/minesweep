@@ -102,12 +102,17 @@ public:
 };
 
 class thread : public voo::casein_thread {
-  const ms::grid *m_cells;
   const ms::upc *m_pc;
+  voo::h2l_buffer *m_insts;
 
 public:
-  void load(const ms::grid *m) { m_cells = m; }
+  void load(const ms::grid *m) {
+    auto mem = m_insts->mapmem();
+    m->load(static_cast<ms::inst *>(*mem));
+  }
   void set_pc(const ms::upc *m) { m_pc = m; }
+
+  [[nodiscard]] bool ready() const noexcept { return m_insts != nullptr; }
 
   void run() override {
     voo::device_and_queue dq{"minesweep", native_ptr()};
@@ -115,9 +120,9 @@ public:
     voo::one_quad quad{dq};
     voo::h2l_image img{dq, ms::atlas::width, ms::atlas::height};
     voo::h2l_buffer insts{dq, ms::instance_buf_size};
+    m_insts = &insts;
 
     auto cb = vee::allocate_primary_command_buffer(dq.command_pool());
-    auto cb2 = vee::allocate_primary_command_buffer(dq.command_pool());
 
     auto dsl = vee::create_descriptor_set_layout({vee::dsl_fragment_sampler()});
     auto dpool =
@@ -157,12 +162,8 @@ public:
       extent_loop([&] {
         sw.acquire_next_image();
 
-        if (m_cells != nullptr) {
-          m_cells->load(static_cast<ms::inst *>(*(insts.mapmem())));
-          m_cells = nullptr;
-        }
+        insts.submit(dq);
 
-        insts.submit(cb2, dq.queue());
         sw.one_time_submit(dq, cb, [&](auto &pcb) {
           img.run(pcb);
 
@@ -170,7 +171,7 @@ public:
           vee::cmd_bind_gr_pipeline(*scb, *gp);
           vee::cmd_push_vertex_constants(*scb, *pl, m_pc);
           vee::cmd_bind_descriptor_set(*scb, *pl, 0, dset);
-          vee::cmd_bind_vertex_buffers(*scb, 1, insts.buffer());
+          insts.cmd_bind_vertex_buffer(scb, 1);
           quad.run(scb, 0, ms::cells);
         });
         sw.queue_present(dq);
@@ -190,8 +191,9 @@ extern "C" void casein_handle(const casein::event &e) {
 
   ch.handle(e);
 
-  if (ch.dirty()) {
-    t.load(ch.cells());
-  }
+  if (t.ready())
+    if (ch.dirty()) {
+      t.load(ch.cells());
+    }
   t.handle(e);
 }
