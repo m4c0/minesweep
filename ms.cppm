@@ -13,25 +13,22 @@ import voo;
 
 using point = dotz::vec2;
 
-point _(volatile point &p) noexcept { return {p.x, p.y}; }
+ms::upc g_pc{};
 
-struct vol {
-  point screen_size{};
-  point mouse_pos{};
-  bool render{};
-};
-
-class thread : public voo::casein_thread {
+class casein_handler : public casein::handler {
+  point m_screen_size{};
+  point m_mouse_pos{};
+  bool m_render{};
   ms::grid m_cells{};
-  hai::uptr<volatile vol> m_vols{new vol{}};
 
+public:
   [[nodiscard]] auto push_consts() {
     ms::upc res{};
-    res.update(ms::grid_size, _(m_vols->mouse_pos), _(m_vols->screen_size));
+    res.update(ms::grid_size, m_mouse_pos, m_screen_size);
     return res;
   }
 
-  void render() { m_vols->render = true; }
+  void render() { m_render = true; }
 
   void click() {
     auto [x, y] = push_consts().sel();
@@ -51,8 +48,14 @@ class thread : public voo::casein_thread {
   }
 
 public:
+  [[nodiscard]] constexpr bool dirty() noexcept {
+    auto r = m_render;
+    m_render = false;
+    return r;
+  }
+  [[nodiscard]] constexpr const auto *cells() noexcept { return &m_cells; }
+
   void create_window(const casein::events::create_window &e) override {
-    casein_thread::create_window(e);
     reset_level();
   }
   void key_down(const casein::events::key_down &e) override {
@@ -64,8 +67,9 @@ public:
     }
   }
   void mouse_move(const casein::events::mouse_move &e) override {
-    m_vols->mouse_pos.x = (*e).x;
-    m_vols->mouse_pos.y = (*e).y;
+    m_mouse_pos.x = (*e).x;
+    m_mouse_pos.y = (*e).y;
+    g_pc = push_consts();
   }
   void mouse_down(const casein::events::mouse_down &e) override {
     switch (*e) {
@@ -78,9 +82,9 @@ public:
     }
   }
   void resize_window(const casein::events::resize_window &e) override {
-    casein_thread::resize_window(e);
-    m_vols->screen_size.x = (*e).width;
-    m_vols->screen_size.y = (*e).height;
+    m_screen_size.x = (*e).width;
+    m_screen_size.y = (*e).height;
+    g_pc = push_consts();
   }
   void touch_down(const casein::events::touch_down &e) override {
     if ((*e).long_press)
@@ -90,9 +94,16 @@ public:
     if (*e == casein::G_TAP_1)
       click();
   }
+};
+
+class thread : public voo::casein_thread {
+  const ms::grid *m_cells;
+
+public:
+  void load(const ms::grid *m) { m_cells = m; }
 
   void run() override {
-    voo::device_and_queue dq{"winnipeg", native_ptr()};
+    voo::device_and_queue dq{"minesweep", native_ptr()};
 
     voo::one_quad quad{dq};
     voo::h2l_image img{dq, ms::atlas::width, ms::atlas::height};
@@ -134,14 +145,12 @@ public:
       });
 
       ms::atlas{}(static_cast<ms::rgba_u8 *>(*(img.mapmem())));
-      ms::upc pc{};
 
       extent_loop([&] {
-        if (m_vols->render) {
-          m_cells.load(static_cast<ms::inst *>(*(insts.mapmem())));
-          m_vols->render = false;
+        if (m_cells != nullptr) {
+          m_cells->load(static_cast<ms::inst *>(*(insts.mapmem())));
+          m_cells = nullptr;
         }
-        pc = push_consts();
 
         sw.acquire_next_image();
         sw.one_time_submit(dq, cb, [&](auto &pcb) {
@@ -150,7 +159,7 @@ public:
 
           auto scb = sw.cmd_render_pass(pcb);
           vee::cmd_bind_gr_pipeline(*scb, *gp);
-          vee::cmd_push_vertex_constants(*scb, *pl, &pc);
+          vee::cmd_push_vertex_constants(*scb, *pl, &g_pc);
           vee::cmd_bind_descriptor_set(*scb, *pl, 0, dset);
           vee::cmd_bind_vertex_buffers(*scb, 1, insts.buffer());
           quad.run(scb, 0, ms::cells);
@@ -163,5 +172,10 @@ public:
 
 extern "C" void casein_handle(const casein::event &e) {
   static thread t{};
+  static casein_handler ch{};
   t.handle(e);
+  ch.handle(e);
+  if (ch.dirty()) {
+    t.load(ch.cells());
+  }
 }

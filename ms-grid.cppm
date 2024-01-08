@@ -106,7 +106,7 @@ public:
     }
   }
 
-  void load(inst *buf) {
+  void load(inst *buf) const {
     for (auto i = 0; i < cells; i++) {
       auto &b = buf[i];
       const auto &c = m_cells[i];
