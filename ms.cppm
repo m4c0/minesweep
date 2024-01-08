@@ -36,28 +36,23 @@ public:
 };
 
 class casein_handler : public casein::handler {
-  point m_screen_size{};
-  point m_mouse_pos{};
   bool m_render{};
   ms::grid m_cells{};
+  const ms::upc *m_pc{};
 
 public:
-  [[nodiscard]] auto push_consts() {
-    ms::upc res{};
-    res.update(ms::grid_size, m_mouse_pos, m_screen_size);
-    return res;
-  }
+  void set_pc(const ms::upc *m) { m_pc = m; }
 
   void render() { m_render = true; }
 
   void click() {
-    auto [x, y] = push_consts().sel();
+    auto [x, y] = m_pc->sel();
     m_cells.click(x, y);
     render();
   }
 
   void flag() {
-    auto [x, y] = push_consts().sel();
+    auto [x, y] = m_pc->sel();
     m_cells.flag(x, y);
     render();
   }
@@ -86,10 +81,6 @@ public:
     default:
     }
   }
-  void mouse_move(const casein::events::mouse_move &e) override {
-    m_mouse_pos.x = (*e).x;
-    m_mouse_pos.y = (*e).y;
-  }
   void mouse_down(const casein::events::mouse_down &e) override {
     switch (*e) {
     case casein::M_LEFT:
@@ -99,10 +90,6 @@ public:
       flag();
       break;
     }
-  }
-  void resize_window(const casein::events::resize_window &e) override {
-    m_screen_size.x = (*e).width;
-    m_screen_size.y = (*e).height;
   }
   void touch_down(const casein::events::touch_down &e) override {
     if ((*e).long_press)
@@ -194,10 +181,13 @@ extern "C" void casein_handle(const casein::event &e) {
   static thread t{};
   static casein_handler ch{};
   static pc_handler pc{};
-  ch.handle(e);
-  pc.handle(e);
 
+  pc.handle(e);
   t.set_pc(*pc);
+  ch.set_pc(*pc);
+
+  ch.handle(e);
+
   if (ch.dirty()) {
     t.load(ch.cells());
   }
