@@ -9,15 +9,16 @@ import voo;
 
 namespace ms {
 class vulkan : public voo::casein_thread {
-  const ms::upc *m_pc;
+  const upc *m_pc;
   voo::h2l_buffer *m_insts;
 
 public:
+  vulkan(const upc *pc) : casein_thread{}, m_pc{pc} {}
+
   void load(const ms::grid *m) {
     auto mem = m_insts->mapmem();
     m->load(static_cast<ms::inst *>(*mem));
   }
-  void set_pc(const ms::upc *m) { m_pc = m; }
 
   [[nodiscard]] bool ready() const noexcept { return m_insts != nullptr; }
 

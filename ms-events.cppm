@@ -7,10 +7,10 @@ namespace ms {
 class casein_handler : public casein::handler {
   bool m_render{};
   ms::grid m_cells{};
-  const ms::upc *m_pc{};
+  const ms::upc *m_pc;
 
 public:
-  void set_pc(const ms::upc *m) { m_pc = m; }
+  casein_handler(const ms::upc *m) : handler{}, m_pc{m} {}
 
   void render() { m_render = true; }
 
