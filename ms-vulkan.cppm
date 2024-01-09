@@ -16,6 +16,9 @@ public:
   vulkan(const upc *pc) : casein_thread{}, m_pc{pc} {}
 
   void load(const ms::grid *m) {
+    while (!m_insts) {
+      // busy wait until the thread actually start
+    }
     auto mem = m_insts->mapmem();
     m->load(static_cast<ms::inst *>(*mem));
   }

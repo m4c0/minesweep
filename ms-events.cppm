@@ -1,18 +1,19 @@
 export module ms:events;
 import :grid;
+import :vulkan;
 import :upc;
 import casein;
 
 namespace ms {
 class casein_handler : public casein::handler {
-  bool m_render{};
   ms::grid m_cells{};
   const ms::upc *m_pc;
+  ms::vulkan *m_ui;
 
 public:
-  casein_handler(const ms::upc *m) : handler{}, m_pc{m} {}
+  casein_handler(const upc *m, vulkan *ui) : handler{}, m_pc{m}, m_ui{ui} {}
 
-  void render() { m_render = true; }
+  void render() { m_ui->load(&m_cells); }
 
   void click() {
     auto [x, y] = m_pc->sel();
@@ -32,13 +33,6 @@ public:
   }
 
 public:
-  [[nodiscard]] constexpr bool dirty() noexcept {
-    auto r = m_render;
-    m_render = false;
-    return r;
-  }
-  [[nodiscard]] constexpr const auto *cells() noexcept { return &m_cells; }
-
   void create_window(const casein::events::create_window &e) override {
     reset_level();
   }

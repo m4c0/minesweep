@@ -8,14 +8,9 @@ import casein;
 extern "C" void casein_handle(const casein::event &e) {
   static ms::pc_handler pc{};
   static ms::vulkan t{*pc};
-  static ms::casein_handler ch{*pc};
+  static ms::casein_handler ch{*pc, &t};
 
   pc.handle(e);
-  ch.handle(e);
-
-  if (t.ready())
-    if (ch.dirty()) {
-      t.load(ch.cells());
-    }
   t.handle(e);
+  ch.handle(e);
 }
