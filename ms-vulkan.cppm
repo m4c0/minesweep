@@ -1,3 +1,6 @@
+#pragma leco add_shader "ms.vert"
+#pragma leco add_shader "ms.frag"
+
 export module ms:vulkan;
 import :grid;
 import :upc;

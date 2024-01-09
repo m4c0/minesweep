@@ -1,8 +1,10 @@
 export module ms:upc;
+import :grid;
+import casein;
 import dotz;
 
 namespace ms {
-export class upc {
+class upc {
   dotz::vec2 m_area_pos{};
   dotz::vec2 m_area_sz{};
   dotz::vec2 m_sel{-1, -1};
@@ -27,4 +29,26 @@ public:
   [[nodiscard]] constexpr auto sel() const noexcept { return m_sel; }
 };
 static_assert(sizeof(upc) == 6 * sizeof(float));
+
+class pc_handler : public casein::handler {
+  dotz::vec2 m_screen_size{};
+  dotz::vec2 m_mouse_pos{};
+  ms::upc m_pc{};
+
+public:
+  [[nodiscard]] constexpr const auto *operator*() const noexcept {
+    return &m_pc;
+  }
+
+  void mouse_move(const casein::events::mouse_move &e) override {
+    m_mouse_pos.x = (*e).x;
+    m_mouse_pos.y = (*e).y;
+    m_pc.update(ms::grid_size, m_mouse_pos, m_screen_size);
+  }
+  void resize_window(const casein::events::resize_window &e) override {
+    m_screen_size.x = (*e).width;
+    m_screen_size.y = (*e).height;
+    m_pc.update(ms::grid_size, m_mouse_pos, m_screen_size);
+  }
+};
 } // namespace ms
