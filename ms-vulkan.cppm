@@ -74,15 +74,14 @@ public:
         sw.acquire_next_image();
 
         insts.submit(dq);
+        img.submit(dq);
 
         sw.one_time_submit(dq, cb, [&](auto &pcb) {
-          img.run(pcb);
-
           auto scb = sw.cmd_render_pass(pcb);
           vee::cmd_bind_gr_pipeline(*scb, *gp);
           vee::cmd_push_vertex_constants(*scb, *pl, m_pc);
           vee::cmd_bind_descriptor_set(*scb, *pl, 0, dset);
-          insts.cmd_bind_vertex_buffer(scb, 1);
+          vee::cmd_bind_vertex_buffers(*scb, 1, insts.buffer());
           quad.run(scb, 0, ms::cells);
         });
         sw.queue_present(dq);
