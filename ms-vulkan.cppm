@@ -11,8 +11,11 @@ namespace ms {
 class vulkan : public voo::casein_thread {
   const upc *m_pc;
   voo::h2l_buffer *m_insts;
+  voo::h2l_image *m_label;
 
 public:
+  static constexpr const auto label_size = 1024;
+
   vulkan(const upc *pc) : casein_thread{}, m_pc{pc} {}
 
   void load(const ms::grid *m) {
@@ -21,6 +24,12 @@ public:
     }
     auto mem = m_insts->mapmem();
     m->load(static_cast<ms::inst *>(*mem));
+  }
+  [[nodiscard]] auto map_label() {
+    while (!m_label) {
+      // TODO: better way of waiting until the thread actually start
+    }
+    return m_label->mapmem();
   }
 
   [[nodiscard]] bool ready() const noexcept { return m_insts != nullptr; }
@@ -32,16 +41,22 @@ public:
     voo::h2l_image img{dq, ms::atlas::width, ms::atlas::height};
     voo::h2l_buffer insts{dq, ms::instance_buf_size};
     m_insts = &insts;
+    voo::h2l_image label{dq, label_size, label_size};
+    m_label = &label;
 
     auto cb = vee::allocate_primary_command_buffer(dq.command_pool());
 
     auto dsl = vee::create_descriptor_set_layout({vee::dsl_fragment_sampler()});
     auto dpool =
-        vee::create_descriptor_pool(1, {vee::combined_image_sampler()});
+        vee::create_descriptor_pool(2, {vee::combined_image_sampler(2)});
     auto dset = vee::allocate_descriptor_set(*dpool, *dsl);
 
     auto smp = vee::create_sampler(vee::nearest_sampler);
     vee::update_descriptor_set(dset, 0, img.iv(), *smp);
+
+    auto l_dset = vee::allocate_descriptor_set(*dpool, *dsl);
+    auto l_smp = vee::create_sampler(vee::linear_sampler);
+    vee::update_descriptor_set(l_dset, 0, label.iv(), *l_smp);
 
     auto pl = vee::create_pipeline_layout(
         {*dsl}, {vee::vertex_push_constant_range<ms::upc>()});
@@ -73,6 +88,7 @@ public:
       extent_loop([&] {
         sw.acquire_next_image();
 
+        label.submit(dq);
         insts.submit(dq);
         img.submit(dq);
 
