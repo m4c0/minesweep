@@ -25,11 +25,17 @@ public:
       *p++ = '-';
       n *= -1;
     }
-    while (n > 0) {
-      *p++ = '0' + n % 10;
-      n /= 10;
+    auto nn = n;
+    while (nn > 0) {
+      p++;
+      nn /= 10;
     }
     traits::size_t sz = p - buf;
+
+    while (n > 0) {
+      *--p = '0' + n % 10;
+      n /= 10;
+    }
 
     auto m = m_ui->map_label();
     auto *img = static_cast<unsigned char *>(*m);
