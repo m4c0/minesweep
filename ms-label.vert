@@ -13,7 +13,7 @@ void main() {
   vec2 area = pc.client_area.xy / pc.client_area.zw;
   area = 2.0 * area - 1.0;
 
-  vec2 p = vec2(0, -6) / pc.client_area.zw;
+  vec2 p = vec2(0, -4) / pc.client_area.zw;
   p += mix(area, -area, position);
 
   gl_Position = vec4(p, 0, 1);
