@@ -94,11 +94,17 @@ public:
 
         sw.one_time_submit(dq, cb, [&](auto &pcb) {
           auto scb = sw.cmd_render_pass(pcb);
+
           vee::cmd_bind_gr_pipeline(*scb, *gp);
           vee::cmd_push_vertex_constants(*scb, *pl, m_pc);
           vee::cmd_bind_descriptor_set(*scb, *pl, 0, dset);
           vee::cmd_bind_vertex_buffers(*scb, 1, insts.buffer());
           quad.run(scb, 0, ms::cells);
+
+          vee::cmd_bind_gr_pipeline(*scb, *gp);
+          vee::cmd_push_vertex_constants(*scb, *pl, m_pc);
+          vee::cmd_bind_descriptor_set(*scb, *pl, 0, l_dset);
+          quad.run(scb, 0, 1);
         });
         sw.queue_present(dq);
       });
