@@ -43,7 +43,7 @@ public:
     voo::h2l_image img{dq, ms::atlas::width, ms::atlas::height};
     voo::h2l_buffer insts{dq, ms::instance_buf_size};
     m_insts = &insts;
-    voo::h2l_image label{dq, label_size, label_size};
+    voo::h2l_image label{dq, label_size, label_size, false};
     m_label = &label;
 
     auto cb = vee::allocate_primary_command_buffer(dq.command_pool());

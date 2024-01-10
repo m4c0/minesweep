@@ -7,7 +7,6 @@ layout(location = 0) out vec4 frag_colour;
 layout(location = 0) in vec2 frag_uv;
 
 void main() {
-  frag_colour = vec4(1);
-  // frag_colour = texture(tex, frag_uv);
+  frag_colour = texture(tex, frag_uv);
 }
 
