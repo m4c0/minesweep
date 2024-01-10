@@ -1,5 +1,7 @@
 #pragma leco add_shader "ms.vert"
 #pragma leco add_shader "ms.frag"
+#pragma leco add_shader "ms-label.vert"
+#pragma leco add_shader "ms-label.frag"
 
 export module ms:vulkan;
 import :grid;
@@ -82,6 +84,17 @@ public:
               vee::vertex_attribute_vec4(1, 6 * sizeof(float)),
           },
       });
+      auto l_gp = vee::create_graphics_pipeline({
+          .pipeline_layout = *pl,
+          .render_pass = sw.render_pass(),
+          .depth_test = false,
+          .shaders{
+              voo::shader("ms-label.vert.spv").pipeline_vert_stage(),
+              voo::shader("ms-label.frag.spv").pipeline_frag_stage(),
+          },
+          .bindings{quad.vertex_input_bind()},
+          .attributes{quad.vertex_attribute(0)},
+      });
 
       ms::atlas{}(static_cast<ms::rgba_u8 *>(*(img.mapmem())));
 
@@ -101,10 +114,10 @@ public:
           vee::cmd_bind_vertex_buffers(*scb, 1, insts.buffer());
           quad.run(scb, 0, ms::cells);
 
-          vee::cmd_bind_gr_pipeline(*scb, *gp);
+          vee::cmd_bind_gr_pipeline(*scb, *l_gp);
           vee::cmd_push_vertex_constants(*scb, *pl, m_pc);
           vee::cmd_bind_descriptor_set(*scb, *pl, 0, l_dset);
-          quad.run(scb, 0, 1);
+          quad.run(scb, 0);
         });
         sw.queue_present(dq);
       });
