@@ -1,5 +1,6 @@
 export module ms:events;
 import :grid;
+import :label;
 import :vulkan;
 import :upc;
 import casein;
@@ -9,11 +10,16 @@ class casein_handler : public casein::handler {
   ms::grid m_cells{};
   const ms::upc *m_pc;
   ms::vulkan *m_ui;
+  ms::label *m_lbl;
 
 public:
-  casein_handler(const upc *m, vulkan *ui) : handler{}, m_pc{m}, m_ui{ui} {}
+  casein_handler(const upc *m, vulkan *ui, label *lbl)
+      : handler{}, m_pc{m}, m_ui{ui}, m_lbl{lbl} {}
 
-  void render() { m_ui->load(&m_cells); }
+  void render() {
+    m_ui->load(&m_cells);
+    m_lbl->update_bomb_count(m_cells.bomb_count());
+  }
 
   void click() {
     auto [x, y] = m_pc->sel();

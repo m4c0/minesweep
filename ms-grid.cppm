@@ -89,6 +89,15 @@ public:
     update_numbers();
   }
 
+  [[nodiscard]] constexpr auto bomb_count() {
+    int res = max_bombs;
+    for (auto &c : m_cells) {
+      if (c.flagged)
+        res--;
+    }
+    return res;
+  }
+
   [[nodiscard]] constexpr cell &at(unsigned x, unsigned y) {
     return m_cells[y * grid_size + x];
   }
