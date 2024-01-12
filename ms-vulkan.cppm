@@ -42,6 +42,7 @@ public:
     release_init_lock();
 
     auto cb = vee::allocate_primary_command_buffer(dq.command_pool());
+    auto cb2 = vee::allocate_secondary_command_buffer(dq.command_pool());
 
     auto dsl = vee::create_descriptor_set_layout({vee::dsl_fragment_sampler()});
     auto dpool =
@@ -91,6 +92,22 @@ public:
           .attributes{quad.vertex_attribute(0)},
       });
 
+      {
+        auto scb = sw.cmd_buf_render_pass_continue(cb2);
+        auto *pc = pc_handler::pc();
+
+        vee::cmd_bind_gr_pipeline(*scb, *gp);
+        vee::cmd_push_vertex_constants(*scb, *pl, pc);
+        vee::cmd_bind_descriptor_set(*scb, *pl, 0, dset);
+        vee::cmd_bind_vertex_buffers(*scb, 1, insts.buffer());
+        quad.run(*scb, 0, ms::cells);
+
+        vee::cmd_bind_gr_pipeline(*scb, *l_gp);
+        vee::cmd_push_vertex_constants(*scb, *pl, pc);
+        vee::cmd_bind_descriptor_set(*scb, *pl, 0, l_dset);
+        quad.run(*scb, 0);
+      }
+
       ms::atlas{}(static_cast<ms::rgba_u8 *>(*(img.mapmem())));
 
       extent_loop([&] {
@@ -101,19 +118,9 @@ public:
         img.submit(dq);
 
         sw.one_time_submit(dq, cb, [&](auto &pcb) {
-          auto scb = sw.cmd_render_pass(pcb);
-          auto *pc = pc_handler::pc();
-
-          vee::cmd_bind_gr_pipeline(*scb, *gp);
-          vee::cmd_push_vertex_constants(*scb, *pl, pc);
-          vee::cmd_bind_descriptor_set(*scb, *pl, 0, dset);
-          vee::cmd_bind_vertex_buffers(*scb, 1, insts.buffer());
-          quad.run(scb, 0, ms::cells);
-
-          vee::cmd_bind_gr_pipeline(*scb, *l_gp);
-          vee::cmd_push_vertex_constants(*scb, *pl, pc);
-          vee::cmd_bind_descriptor_set(*scb, *pl, 0, l_dset);
-          quad.run(scb, 0);
+          auto scb = sw.cmd_render_pass(pcb, true);
+          vee::cmd_execute_command(*scb, cb2);
+          ;
         });
         sw.queue_present(dq);
       });
