@@ -35,6 +35,8 @@ class pc_handler : public casein::handler {
   dotz::vec2 m_mouse_pos{};
   ms::upc m_pc{};
 
+  pc_handler() = default;
+
 public:
   [[nodiscard]] constexpr const auto *operator*() const noexcept {
     return &m_pc;
@@ -50,5 +52,11 @@ public:
     m_screen_size.y = (*e).height;
     m_pc.update(ms::grid_size, m_mouse_pos, m_screen_size);
   }
+
+  static auto &instance() {
+    static pc_handler i{};
+    return i;
+  }
+  static auto *pc() { return *instance(); }
 };
 } // namespace ms

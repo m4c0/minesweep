@@ -11,14 +11,13 @@ import voo;
 
 namespace ms {
 class vulkan : public voo::casein_thread {
-  const upc *m_pc;
   voo::h2l_buffer *m_insts;
   voo::h2l_image *m_label;
 
 public:
   static constexpr const auto label_size = 1024;
 
-  vulkan(const upc *pc) : casein_thread{}, m_pc{pc} {}
+  vulkan() = default;
 
   void load(const ms::grid *m) {
     while (!m_insts) {
@@ -107,15 +106,16 @@ public:
 
         sw.one_time_submit(dq, cb, [&](auto &pcb) {
           auto scb = sw.cmd_render_pass(pcb);
+          auto *pc = pc_handler::pc();
 
           vee::cmd_bind_gr_pipeline(*scb, *gp);
-          vee::cmd_push_vertex_constants(*scb, *pl, m_pc);
+          vee::cmd_push_vertex_constants(*scb, *pl, pc);
           vee::cmd_bind_descriptor_set(*scb, *pl, 0, dset);
           vee::cmd_bind_vertex_buffers(*scb, 1, insts.buffer());
           quad.run(scb, 0, ms::cells);
 
           vee::cmd_bind_gr_pipeline(*scb, *l_gp);
-          vee::cmd_push_vertex_constants(*scb, *pl, m_pc);
+          vee::cmd_push_vertex_constants(*scb, *pl, pc);
           vee::cmd_bind_descriptor_set(*scb, *pl, 0, l_dset);
           quad.run(scb, 0);
         });
