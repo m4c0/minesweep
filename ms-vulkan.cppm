@@ -6,17 +6,13 @@
 export module ms:vulkan;
 import :grid;
 import :upc;
-import hai;
-import mtx;
 import vee;
 import voo;
 
 namespace ms {
 class vulkan : public voo::casein_thread {
-  mtx::mutex m_mutex{};
   voo::h2l_buffer *m_insts;
   voo::h2l_image *m_label;
-  hai::uptr<mtx::lock> m_lock{new mtx::lock{&m_mutex}};
 
   vulkan() = default;
 
@@ -24,12 +20,12 @@ public:
   static constexpr const auto label_size = 1024;
 
   void load(const ms::grid *m) {
-    mtx::lock lck{&m_mutex};
+    auto lck = wait_init();
     auto mem = m_insts->mapmem();
     m->load(static_cast<ms::inst *>(*mem));
   }
   [[nodiscard]] auto map_label() {
-    mtx::lock lck{&m_mutex};
+    auto lck = wait_init();
     return m_label->mapmem();
   }
 
@@ -45,7 +41,7 @@ public:
 
     m_insts = &insts;
     m_label = &label;
-    m_lock = {};
+    release_init_lock();
 
     auto cb = vee::allocate_primary_command_buffer(dq.command_pool());
 
