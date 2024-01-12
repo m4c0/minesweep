@@ -92,8 +92,7 @@ public:
           .attributes{quad.vertex_attribute(0)},
       });
 
-      {
-        auto scb = sw.cmd_buf_render_pass_continue(cb2);
+      sw.cmd_buf_render_pass_continue(cb2, [&](auto &scb) {
         auto *pc = pc_handler::pc();
 
         vee::cmd_bind_gr_pipeline(*scb, *gp);
@@ -106,7 +105,7 @@ public:
         vee::cmd_push_vertex_constants(*scb, *pl, pc);
         vee::cmd_bind_descriptor_set(*scb, *pl, 0, l_dset);
         quad.run(*scb, 0);
-      }
+      });
 
       ms::atlas{}(static_cast<ms::rgba_u8 *>(*(img.mapmem())));
 
