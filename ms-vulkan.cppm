@@ -109,9 +109,7 @@ public:
 
       ms::atlas{}(static_cast<ms::rgba_u8 *>(*(img.mapmem())));
 
-      extent_loop([&] {
-        sw.acquire_next_image();
-
+      extent_loop(dq, sw, [&] {
         label.submit(dq);
         insts.submit(dq);
         img.submit(dq);
@@ -121,7 +119,6 @@ public:
           vee::cmd_execute_command(*scb, cb2);
           ;
         });
-        sw.queue_present(dq);
       });
     }
   }
