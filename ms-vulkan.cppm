@@ -14,10 +14,10 @@ class vulkan : public voo::casein_thread {
   voo::h2l_buffer *m_insts;
   voo::h2l_image *m_label;
 
+  vulkan() = default;
+
 public:
   static constexpr const auto label_size = 1024;
-
-  vulkan() = default;
 
   void load(const ms::grid *m) {
     while (!m_insts) {
@@ -122,6 +122,10 @@ public:
         sw.queue_present(dq);
       });
     }
+  }
+  static auto &instance() {
+    static vulkan i{};
+    return i;
   }
 };
 } // namespace ms

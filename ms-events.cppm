@@ -8,15 +8,13 @@ import casein;
 namespace ms {
 class casein_handler : public casein::handler {
   ms::grid m_cells{};
-  ms::vulkan *m_ui;
-  ms::label *m_lbl;
+
+  casein_handler() = default;
 
 public:
-  casein_handler(vulkan *ui, label *lbl) : handler{}, m_ui{ui}, m_lbl{lbl} {}
-
   void render() {
-    m_ui->load(&m_cells);
-    m_lbl->update_bomb_count(m_cells.bomb_count());
+    vulkan::instance().load(&m_cells);
+    label::instance().update_bomb_count(m_cells.bomb_count());
   }
 
   void click() {
@@ -65,6 +63,11 @@ public:
   void gesture(const casein::events::gesture &e) override {
     if (*e == casein::G_TAP_1)
       click();
+  }
+
+  static auto &instance() {
+    static casein_handler i{};
+    return i;
   }
 };
 } // namespace ms
