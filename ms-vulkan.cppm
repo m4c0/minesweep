@@ -29,8 +29,6 @@ public:
     return m_label->mapmem();
   }
 
-  [[nodiscard]] bool ready() const noexcept { return m_insts != nullptr; }
-
   void run() override {
     voo::device_and_queue dq{"minesweep", native_ptr()};
 
