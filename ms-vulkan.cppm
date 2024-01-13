@@ -92,17 +92,15 @@ public:
           .attributes{quad.vertex_attribute(0)},
       });
 
+      // TODO: fix the update of mouse_sel, since it gets "baked" in the cmd_buf
       sw.cmd_buf_render_pass_continue(cb2, [&](auto &scb) {
-        auto *pc = pc_handler::pc();
-
         vee::cmd_bind_gr_pipeline(*scb, *gp);
-        vee::cmd_push_vertex_constants(*scb, *pl, pc);
         vee::cmd_bind_descriptor_set(*scb, *pl, 0, dset);
+        vee::cmd_push_vertex_constants(*scb, *pl, pc_handler::pc());
         vee::cmd_bind_vertex_buffers(*scb, 1, insts.buffer());
         quad.run(*scb, 0, ms::cells);
 
         vee::cmd_bind_gr_pipeline(*scb, *l_gp);
-        vee::cmd_push_vertex_constants(*scb, *pl, pc);
         vee::cmd_bind_descriptor_set(*scb, *pl, 0, l_dset);
         quad.run(*scb, 0);
       });
@@ -117,7 +115,6 @@ public:
         sw.one_time_submit(dq, cb, [&](auto &pcb) {
           auto scb = sw.cmd_render_pass(pcb, true);
           vee::cmd_execute_command(*scb, cb2);
-          ;
         });
       });
     }
