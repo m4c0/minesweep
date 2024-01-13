@@ -2,6 +2,7 @@ export module ms:upc;
 import :grid;
 import casein;
 import dotz;
+import quack;
 
 namespace ms {
 class upc {
@@ -12,7 +13,10 @@ class upc {
 public:
   upc() = default;
 
-  void update(int grid_size, dotz::vec2 mouse, dotz::vec2 scr_size) {
+  void update(dotz::vec2 scr_size) {
+    auto grid_size = ms::grid_size;
+    auto mouse = quack::mouse_tracker::instance().mouse_pos();
+
     const auto m = grid_size * 0.1;
     auto asp = scr_size.x / scr_size.y;
     auto aw = asp > 1 ? asp : 1;
@@ -32,7 +36,6 @@ static_assert(sizeof(upc) == 6 * sizeof(float));
 
 class pc_handler : public casein::handler {
   dotz::vec2 m_screen_size{};
-  dotz::vec2 m_mouse_pos{};
   ms::upc m_pc{};
 
   pc_handler() = default;
@@ -43,14 +46,12 @@ public:
   }
 
   void mouse_move(const casein::events::mouse_move &e) override {
-    m_mouse_pos.x = (*e).x;
-    m_mouse_pos.y = (*e).y;
-    m_pc.update(ms::grid_size, m_mouse_pos, m_screen_size);
+    m_pc.update(m_screen_size);
   }
   void resize_window(const casein::events::resize_window &e) override {
     m_screen_size.x = (*e).width;
     m_screen_size.y = (*e).height;
-    m_pc.update(ms::grid_size, m_mouse_pos, m_screen_size);
+    m_pc.update(m_screen_size);
   }
 
   static auto &instance() {
