@@ -13,12 +13,11 @@ class upc {
 public:
   upc() = default;
 
-  void update(dotz::vec2 scr_size) {
+  void update(float asp) {
     auto grid_size = ms::grid_size;
-    auto mouse = quack::mouse_tracker::instance().mouse_pos();
+    auto mouse = quack::mouse_tracker::instance().mouse_pos_rel();
 
     const auto m = grid_size * 0.1;
-    auto asp = scr_size.x / scr_size.y;
     auto aw = asp > 1 ? asp : 1;
     auto ah = asp > 1 ? 1 : asp;
 
@@ -27,7 +26,7 @@ public:
     m_area_sz.y /= ah;
     m_area_pos = (m_area_sz - grid_size) / 2;
 
-    m_sel = dotz::floor(-m_area_pos + m_area_sz * mouse / scr_size);
+    m_sel = dotz::floor(-m_area_pos + m_area_sz * mouse);
   }
 
   [[nodiscard]] constexpr auto sel() const noexcept { return m_sel; }
@@ -35,7 +34,7 @@ public:
 static_assert(sizeof(upc) == 6 * sizeof(float));
 
 class pc_handler : public casein::handler {
-  dotz::vec2 m_screen_size{};
+  float m_aspect{1};
   ms::upc m_pc{};
 
   pc_handler() = default;
@@ -46,12 +45,14 @@ public:
   }
 
   void mouse_move(const casein::events::mouse_move &e) override {
-    m_pc.update(m_screen_size);
+    m_pc.update(m_aspect);
   }
   void resize_window(const casein::events::resize_window &e) override {
-    m_screen_size.x = (*e).width;
-    m_screen_size.y = (*e).height;
-    m_pc.update(m_screen_size);
+    float w = (*e).width;
+    float h = (*e).height;
+
+    m_aspect = w / h;
+    m_pc.update(m_aspect);
   }
 
   static auto &instance() {
