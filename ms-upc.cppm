@@ -13,11 +13,12 @@ class upc {
 public:
   upc() = default;
 
-  void update(float asp) {
+  void update() {
     auto grid_size = ms::grid_size;
     auto mouse = quack::mouse_tracker::instance().mouse_pos_rel();
 
     const auto m = grid_size * 0.1;
+    auto asp = quack::extent_tracker::instance().screen_aspect();
     auto aw = asp > 1 ? asp : 1;
     auto ah = asp > 1 ? 1 : asp;
 
@@ -34,7 +35,6 @@ public:
 static_assert(sizeof(upc) == 6 * sizeof(float));
 
 class pc_handler : public casein::handler {
-  float m_aspect{1};
   ms::upc m_pc{};
 
   pc_handler() = default;
@@ -45,14 +45,10 @@ public:
   }
 
   void mouse_move(const casein::events::mouse_move &e) override {
-    m_pc.update(m_aspect);
+    m_pc.update();
   }
   void resize_window(const casein::events::resize_window &e) override {
-    float w = (*e).width;
-    float h = (*e).height;
-
-    m_aspect = w / h;
-    m_pc.update(m_aspect);
+    m_pc.update();
   }
 
   static auto &instance() {
