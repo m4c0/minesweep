@@ -91,6 +91,9 @@ struct vulkan : voo::casein_thread {
         sw.queue_one_time_submit(dq.queue(), [&](auto pcb) {
           auto scb = sw.cmd_render_pass(pcb);
 
+          vee::cmd_set_viewport(*scb, sw.extent());
+          vee::cmd_set_scissor(*scb, sw.extent());
+
           vee::cmd_bind_gr_pipeline(*scb, *gp);
           vee::cmd_bind_descriptor_set(*scb, *pl, 0, dset);
           vee::cmd_push_vertex_constants(*scb, *pl, &pc);
