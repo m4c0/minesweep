@@ -7,8 +7,6 @@ import :vulkan;
 import casein;
 import quack;
 
-static ms::grid g_cells{};
-
 static void render() {
   // ms::vulkan::instance().load(&g_cells);
   // ms::label::instance().update_bomb_count(g_cells.bomb_count());
@@ -41,5 +39,7 @@ static struct init {
     handle(MOUSE_DOWN, M_RIGHT, flag);
     handle(GESTURE, G_TAP_1, click);
     // TODO: re-add long-press touch for flag
+
+    ms::vulkan::instance();
   }
 } i;

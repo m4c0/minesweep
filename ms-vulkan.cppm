@@ -9,36 +9,31 @@ import :upc;
 import vee;
 import voo;
 
+static void load_atlas(voo::h2l_image *i) {
+  ms::atlas{}(static_cast<ms::rgba_u8 *>(*(voo::mapmem{i->host_memory()})));
+}
+static void load_insts(voo::h2l_buffer *b) {
+  voo::mapmem mem{b->host_memory()};
+  g_cells.load(static_cast<ms::inst *>(*mem));
+}
+static void load_label(voo::h2l_image *i) {}
+
 namespace ms {
-class vulkan : voo::casein_thread {
-  voo::h2l_buffer *m_insts;
-  voo::h2l_image *m_label;
-
-  vulkan() = default;
-
-public:
+struct vulkan : voo::casein_thread {
   static constexpr const auto label_size = 1024;
-
-  void load(const ms::grid *m) {
-    voo::mapmem mem{m_insts->host_memory()};
-    m->load(static_cast<ms::inst *>(*mem));
-  }
-  [[nodiscard]] auto map_label() { voo::mapmem mem{m_label->host_memory()}; }
 
   void run() {
     voo::device_and_queue dq{"minesweep"};
 
     voo::one_quad quad{dq};
-    voo::h2l_image img{dq, ms::atlas::width, ms::atlas::height};
-    voo::h2l_buffer insts{dq, ms::instance_buf_size};
-    voo::h2l_image label{dq, label_size, label_size, false};
-
-    m_insts = &insts;
-    m_label = &label;
-
-    vee::command_pool cp{};
-    auto cb = vee::allocate_primary_command_buffer(*cp);
-    auto cb2 = vee::allocate_secondary_command_buffer(*cp);
+    auto img =
+        voo::updater{dq.queue(), &load_atlas, dq, unsigned{ms::atlas::width},
+                     unsigned{ms::atlas::height}};
+    auto insts = voo::updater{dq.queue(), &load_insts, dq,
+                              unsigned{ms::instance_buf_size}};
+    auto label =
+        voo::updater{dq.queue(),           &load_label,          dq,
+                     unsigned{label_size}, unsigned{label_size}, false};
 
     auto dsl = vee::create_descriptor_set_layout({vee::dsl_fragment_sampler()});
     auto dpool =
@@ -46,16 +41,16 @@ public:
     auto dset = vee::allocate_descriptor_set(*dpool, *dsl);
 
     auto smp = vee::create_sampler(vee::nearest_sampler);
-    vee::update_descriptor_set(dset, 0, img.iv(), *smp);
+    vee::update_descriptor_set(dset, 0, img.data().iv(), *smp);
 
     auto l_dset = vee::allocate_descriptor_set(*dpool, *dsl);
     auto l_smp = vee::create_sampler(vee::linear_sampler);
-    vee::update_descriptor_set(l_dset, 0, label.iv(), *l_smp);
+    vee::update_descriptor_set(l_dset, 0, label.data().iv(), *l_smp);
 
     auto pl = vee::create_pipeline_layout(
         {*dsl}, {vee::vertex_push_constant_range<ms::upc>()});
 
-    while (false) {
+    while (!interrupted()) {
       voo::swapchain_and_stuff sw{dq};
 
       auto gp = vee::create_graphics_pipeline({
@@ -88,20 +83,18 @@ public:
           .attributes{quad.vertex_attribute(0)},
       });
 
-      ms::atlas{}(static_cast<ms::rgba_u8 *>(*(img.mapmem())));
+      img.run_once();
+      label.run_once();
+      insts.run_once();
 
       extent_loop(dq.queue(), sw, [&] {
-        label.submit(dq);
-        insts.submit(dq);
-        img.submit(dq);
-
         sw.queue_one_time_submit(dq.queue(), [&](auto pcb) {
           auto scb = sw.cmd_render_pass(pcb);
 
           vee::cmd_bind_gr_pipeline(*scb, *gp);
           vee::cmd_bind_descriptor_set(*scb, *pl, 0, dset);
           vee::cmd_push_vertex_constants(*scb, *pl, &pc);
-          vee::cmd_bind_vertex_buffers(*scb, 1, insts.local_buffer());
+          vee::cmd_bind_vertex_buffers(*scb, 1, insts.data().local_buffer());
           quad.run(*scb, 0, ms::cells);
 
           vee::cmd_bind_gr_pipeline(*scb, *l_gp);

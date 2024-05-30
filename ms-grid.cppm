@@ -138,3 +138,5 @@ public:
   }
 };
 } // namespace ms
+
+static ms::grid g_cells{};
