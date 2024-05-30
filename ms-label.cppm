@@ -1,4 +1,4 @@
-#pragma leco add_resource "VictorMono-Regular.otf"
+// #pragma leco add_resource "VictorMono-Regular.otf"
 export module ms:label;
 import :vulkan;
 import casein;
