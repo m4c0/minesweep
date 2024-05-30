@@ -18,13 +18,13 @@ public:
   }
 
   void click() {
-    auto [x, y] = pc_handler::pc()->sel();
+    auto [x, y] = pc.sel();
     m_cells.click(x, y);
     render();
   }
 
   void flag() {
-    auto [x, y] = pc_handler::pc()->sel();
+    auto [x, y] = pc.sel();
     m_cells.flag(x, y);
     render();
   }

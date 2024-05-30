@@ -15,12 +15,12 @@ public:
 
   void update() {
     auto grid_size = ms::grid_size;
-    // auto mouse = quack::mouse_tracker::instance().mouse_pos_rel();
-    dotz::vec2 mouse{};
+    dotz::vec2 mouse{casein::mouse_pos.x, casein::mouse_pos.y};
 
     const auto m = grid_size * 0.1;
-    // auto asp = quack::extent_tracker::instance().screen_aspect();
-    auto asp = 1;
+    float scr_w = casein::window_size.x;
+    float scr_h = casein::window_size.y;
+    auto asp = scr_w / scr_h;
     auto aw = asp > 1 ? asp : 1;
     auto ah = asp > 1 ? 1 : asp;
 
@@ -33,25 +33,6 @@ public:
   }
 
   [[nodiscard]] constexpr auto sel() const noexcept { return m_sel; }
-};
+} pc;
 static_assert(sizeof(upc) == 6 * sizeof(float));
-
-class pc_handler {
-  ms::upc m_pc{};
-
-  pc_handler() = default;
-
-public:
-  [[nodiscard]] constexpr const auto *operator*() const noexcept {
-    return &m_pc;
-  }
-
-  void update() { m_pc.update(); }
-
-  static auto &instance() {
-    static pc_handler i{};
-    return i;
-  }
-  static auto *pc() { return *instance(); }
-};
 } // namespace ms
