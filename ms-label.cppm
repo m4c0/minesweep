@@ -3,7 +3,7 @@ export module ms:label;
 import :vulkan;
 import casein;
 import traits;
-import what_the_font;
+// import what_the_font;
 
 namespace ms {
 class label {
@@ -11,8 +11,8 @@ class label {
   static constexpr const auto font_size = 36;
   static constexpr const auto img_size = vulkan::label_size;
 
-  wtf::library m_wtf{};
-  wtf::face m_face = m_wtf.new_face(font_name, font_size);
+  // wtf::library m_wtf{};
+  // wtf::face m_face = m_wtf.new_face(font_name, font_size);
 
   label() = default;
 
