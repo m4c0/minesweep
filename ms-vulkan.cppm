@@ -10,7 +10,7 @@ import vee;
 import voo;
 
 namespace ms {
-class vulkan {
+class vulkan : voo::casein_thread {
   voo::h2l_buffer *m_insts;
   voo::h2l_image *m_label;
 
@@ -26,7 +26,6 @@ public:
   [[nodiscard]] auto map_label() { voo::mapmem mem{m_label->host_memory()}; }
 
   void run() {
-    /*
     voo::device_and_queue dq{"minesweep"};
 
     voo::one_quad quad{dq};
@@ -61,7 +60,7 @@ public:
 
       auto gp = vee::create_graphics_pipeline({
           .pipeline_layout = *pl,
-          .render_pass = sw.render_pass(),
+          .render_pass = dq.render_pass(),
           .shaders{
               voo::shader("ms.vert.spv").pipeline_vert_stage(),
               voo::shader("ms.frag.spv").pipeline_frag_stage(),
@@ -79,7 +78,7 @@ public:
       });
       auto l_gp = vee::create_graphics_pipeline({
           .pipeline_layout = *pl,
-          .render_pass = sw.render_pass(),
+          .render_pass = dq.render_pass(),
           .depth_test = false,
           .shaders{
               voo::shader("ms-label.vert.spv").pipeline_vert_stage(),
@@ -89,33 +88,28 @@ public:
           .attributes{quad.vertex_attribute(0)},
       });
 
-      // TODO: fix the update of mouse_sel, since it gets "baked" in the cmd_buf
-      sw.cmd_buf_render_pass_continue(cb2, [&](auto &scb) {
-        vee::cmd_bind_gr_pipeline(*scb, *gp);
-        vee::cmd_bind_descriptor_set(*scb, *pl, 0, dset);
-        vee::cmd_push_vertex_constants(*scb, *pl, pc_handler::pc());
-        vee::cmd_bind_vertex_buffers(*scb, 1, insts.buffer());
-        quad.run(*scb, 0, ms::cells);
-
-        vee::cmd_bind_gr_pipeline(*scb, *l_gp);
-        vee::cmd_bind_descriptor_set(*scb, *pl, 0, l_dset);
-        quad.run(*scb, 0);
-      });
-
       ms::atlas{}(static_cast<ms::rgba_u8 *>(*(img.mapmem())));
 
-      extent_loop(dq, sw, [&] {
+      extent_loop(dq.queue(), sw, [&] {
         label.submit(dq);
         insts.submit(dq);
         img.submit(dq);
 
-        sw.one_time_submit(dq, cb, [&](auto &pcb) {
-          auto scb = sw.cmd_render_pass(pcb, true);
-          vee::cmd_execute_command(*scb, cb2);
+        sw.queue_one_time_submit(dq.queue(), [&](auto pcb) {
+          auto scb = sw.cmd_render_pass(pcb);
+
+          vee::cmd_bind_gr_pipeline(*scb, *gp);
+          vee::cmd_bind_descriptor_set(*scb, *pl, 0, dset);
+          vee::cmd_push_vertex_constants(*scb, *pl, &pc);
+          vee::cmd_bind_vertex_buffers(*scb, 1, insts.local_buffer());
+          quad.run(*scb, 0, ms::cells);
+
+          vee::cmd_bind_gr_pipeline(*scb, *l_gp);
+          vee::cmd_bind_descriptor_set(*scb, *pl, 0, l_dset);
+          quad.run(*scb, 0);
         });
       });
     }
-  */
   }
   static auto &instance() {
     static vulkan i{};
