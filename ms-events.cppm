@@ -6,7 +6,7 @@ import :upc;
 import casein;
 
 namespace ms {
-class casein_handler : public casein::handler {
+class casein_handler {
   ms::grid m_cells{};
 
   casein_handler() = default;
@@ -35,7 +35,8 @@ public:
   }
 
 public:
-  void create_window(const casein::events::create_window &e) override {
+  /*
+  void create_window() override {
     reset_level();
   }
   void key_down(const casein::events::key_down &e) override {
@@ -64,6 +65,7 @@ public:
     if (*e == casein::G_TAP_1)
       click();
   }
+  */
 
   static auto &instance() {
     static casein_handler i{};

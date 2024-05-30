@@ -29,19 +29,21 @@ public:
       p++;
       nn /= 10;
     }
-    traits::size_t sz = p - buf;
+    // traits::size_t sz = p - buf;
 
     while (n > 0) {
       *--p = '0' + n % 10;
       n /= 10;
     }
 
+    /*
     auto m = vulkan::instance().map_label();
     auto *img = static_cast<unsigned char *>(*m);
     for (auto i = 0; i < img_size * img_size; i++) {
       img[i] = 0;
     }
     m_face.shape_en({buf, sz}).draw(img, img_size, img_size, 0, font_size);
+    */
   }
 
   static auto &instance() {

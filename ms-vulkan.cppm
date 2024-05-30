@@ -10,7 +10,7 @@ import vee;
 import voo;
 
 namespace ms {
-class vulkan : public voo::casein_thread {
+class vulkan {
   voo::h2l_buffer *m_insts;
   voo::h2l_image *m_label;
 
@@ -20,17 +20,14 @@ public:
   static constexpr const auto label_size = 1024;
 
   void load(const ms::grid *m) {
-    auto lck = wait_init();
-    auto mem = m_insts->mapmem();
+    voo::mapmem mem{m_insts->host_memory()};
     m->load(static_cast<ms::inst *>(*mem));
   }
-  [[nodiscard]] auto map_label() {
-    auto lck = wait_init();
-    return m_label->mapmem();
-  }
+  [[nodiscard]] auto map_label() { voo::mapmem mem{m_label->host_memory()}; }
 
-  void run() override {
-    voo::device_and_queue dq{"minesweep", native_ptr()};
+  void run() {
+    /*
+    voo::device_and_queue dq{"minesweep"};
 
     voo::one_quad quad{dq};
     voo::h2l_image img{dq, ms::atlas::width, ms::atlas::height};
@@ -39,10 +36,10 @@ public:
 
     m_insts = &insts;
     m_label = &label;
-    release_init_lock();
 
-    auto cb = vee::allocate_primary_command_buffer(dq.command_pool());
-    auto cb2 = vee::allocate_secondary_command_buffer(dq.command_pool());
+    vee::command_pool cp{};
+    auto cb = vee::allocate_primary_command_buffer(*cp);
+    auto cb2 = vee::allocate_secondary_command_buffer(*cp);
 
     auto dsl = vee::create_descriptor_set_layout({vee::dsl_fragment_sampler()});
     auto dpool =
@@ -59,7 +56,7 @@ public:
     auto pl = vee::create_pipeline_layout(
         {*dsl}, {vee::vertex_push_constant_range<ms::upc>()});
 
-    while (!interrupted()) {
+    while (false) {
       voo::swapchain_and_stuff sw{dq};
 
       auto gp = vee::create_graphics_pipeline({
@@ -118,6 +115,7 @@ public:
         });
       });
     }
+  */
   }
   static auto &instance() {
     static vulkan i{};

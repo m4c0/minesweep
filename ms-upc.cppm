@@ -15,10 +15,12 @@ public:
 
   void update() {
     auto grid_size = ms::grid_size;
-    auto mouse = quack::mouse_tracker::instance().mouse_pos_rel();
+    // auto mouse = quack::mouse_tracker::instance().mouse_pos_rel();
+    dotz::vec2 mouse{};
 
     const auto m = grid_size * 0.1;
-    auto asp = quack::extent_tracker::instance().screen_aspect();
+    // auto asp = quack::extent_tracker::instance().screen_aspect();
+    auto asp = 1;
     auto aw = asp > 1 ? asp : 1;
     auto ah = asp > 1 ? 1 : asp;
 
@@ -34,7 +36,7 @@ public:
 };
 static_assert(sizeof(upc) == 6 * sizeof(float));
 
-class pc_handler : public casein::handler {
+class pc_handler {
   ms::upc m_pc{};
 
   pc_handler() = default;
@@ -44,12 +46,7 @@ public:
     return &m_pc;
   }
 
-  void mouse_move(const casein::events::mouse_move &e) override {
-    m_pc.update();
-  }
-  void resize_window(const casein::events::resize_window &e) override {
-    m_pc.update();
-  }
+  void update() { m_pc.update(); }
 
   static auto &instance() {
     static pc_handler i{};
