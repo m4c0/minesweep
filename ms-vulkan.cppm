@@ -2,6 +2,7 @@
 #pragma leco add_shader "ms.frag"
 #pragma leco add_shader "ms-label.vert"
 #pragma leco add_shader "ms-label.frag"
+#pragma leco add_resource "atlas.png"
 
 export module ms:vulkan;
 import :grid;
@@ -9,9 +10,6 @@ import :upc;
 import vee;
 import voo;
 
-static void load_atlas(voo::h2l_image *i) {
-  ms::atlas{}(static_cast<ms::rgba_u8 *>(*(voo::mapmem{i->host_memory()})));
-}
 static void load_insts(voo::h2l_buffer *b) {
   voo::mapmem mem{b->host_memory()};
   ms::grid::instance().load(static_cast<ms::inst *>(*mem));
@@ -28,14 +26,14 @@ struct vulkan : voo::casein_thread {
     voo::device_and_queue dq{"minesweep"};
 
     voo::one_quad quad{dq};
-    auto img =
-        voo::updater{dq.queue(), &load_atlas, dq, unsigned{ms::atlas::width},
-                     unsigned{ms::atlas::height}};
     auto insts = voo::updater{dq.queue(), &load_insts, dq,
                               unsigned{ms::instance_buf_size}};
     auto label =
         voo::updater{dq.queue(),           &load_label,          dq,
                      unsigned{label_size}, unsigned{label_size}, false};
+
+    voo::sires_image img{"atlas.png", &dq};
+    img.run_once();
 
     auto dsl = vee::create_descriptor_set_layout({vee::dsl_fragment_sampler()});
     auto dpool =
@@ -85,7 +83,6 @@ struct vulkan : voo::casein_thread {
           .attributes{quad.vertex_attribute(0)},
       });
 
-      img.run_once();
       label.run_once();
       insts.run_once();
 

@@ -1,4 +1,5 @@
 export module ms:atlas;
+import dotz;
 
 namespace ms {
 struct cell {
@@ -7,17 +8,12 @@ struct cell {
   bool visible;
   bool flagged;
 };
-struct rgba_u8 {
-  unsigned char r;
-  unsigned char g;
-  unsigned char b;
-  unsigned char a;
-};
 
 enum sprites {
   s_bomb,
   s_empty,
   s_hidden,
+  s_flagged,
   s_1,
   s_2,
   s_3,
@@ -26,141 +22,25 @@ enum sprites {
   s_6,
   s_7,
   s_8,
-  s_flagged,
   sprite_count
 };
-struct atlas {
-  static constexpr const auto width = 8;
-  static constexpr const auto height = 8 * sprite_count;
-  static constexpr const auto pixel_count = width * height;
-  static constexpr const char pixels[pixel_count + 1] = "        " //
-                                                        " * ** * "
-                                                        "  ****  "
-                                                        " ****** "
-                                                        " ****** "
-                                                        "  ****  "
-                                                        " * ** * "
-                                                        "        "
-                                                        "        " //
-                                                        "        "
-                                                        "        "
-                                                        "        "
-                                                        "        "
-                                                        "        "
-                                                        "        "
-                                                        "        "
-                                                        ".......:" //
-                                                        ".      :"
-                                                        ".      :"
-                                                        ".      :"
-                                                        ".      :"
-                                                        ".      :"
-                                                        ".      :"
-                                                        ".:::::::"
-                                                        ".......:" //
-                                                        ".      :"
-                                                        ".  OO  :"
-                                                        ".   O  :"
-                                                        ".   O  :"
-                                                        ".  OOO :"
-                                                        ".      :"
-                                                        ".:::::::"
-                                                        ".......:" //
-                                                        ".      :"
-                                                        ".  OOO :"
-                                                        ".   OO :"
-                                                        ".  O   :"
-                                                        ".  OOO :"
-                                                        ".      :"
-                                                        ".:::::::"
-                                                        ".......:" //
-                                                        ".      :"
-                                                        ".  OOO :"
-                                                        ".   OO :"
-                                                        ".    O :"
-                                                        ".  OOO :"
-                                                        ".      :"
-                                                        ".:::::::"
-                                                        ".......:" //
-                                                        ".      :"
-                                                        ".  O O :"
-                                                        ".  OOO :"
-                                                        ".    O :"
-                                                        ".    O :"
-                                                        ".      :"
-                                                        ".:::::::"
-                                                        ".......:" //
-                                                        ".      :"
-                                                        ".  OOO :"
-                                                        ".  OO  :"
-                                                        ".    O :"
-                                                        ".  OOO :"
-                                                        ".      :"
-                                                        ".:::::::"
-                                                        ".......:" //
-                                                        ".      :"
-                                                        ".  OOO :"
-                                                        ".  O   :"
-                                                        ".  OOO :"
-                                                        ".  OOO :"
-                                                        ".      :"
-                                                        ".:::::::"
-                                                        ".......:" //
-                                                        ".      :"
-                                                        ". OOO  :"
-                                                        ".   O  :"
-                                                        ".   O  :"
-                                                        ".   O  :"
-                                                        ".      :"
-                                                        ".:::::::"
-                                                        ".......:" //
-                                                        ".      :"
-                                                        ".  OOO :"
-                                                        ".  O O :"
-                                                        ".  OOO :"
-                                                        ".  OOO :"
-                                                        ".      :"
-                                                        ".:::::::"
-                                                        ".......:" //
-                                                        ".      :"
-                                                        ". O*** :"
-                                                        ". O*** :"
-                                                        ". O    :"
-                                                        ". O    :"
-                                                        ".      :"
-                                                        ".:::::::";
-
-  void operator()(rgba_u8 *img) {
-    for (auto i = 0; i < pixel_count; i++) {
-      switch (pixels[i]) {
-      case ' ':
-        img[i] = {0, 0, 0, 0};
-        break;
-      case '*':
-        img[i] = {255, 0, 0, 255};
-        break;
-      case '.':
-        img[i] = {64, 64, 64, 255};
-        break;
-      case ':':
-        img[i] = {32, 32, 32, 255};
-        break;
-      case 'O':
-        img[i] = {128, 255, 64, 255};
-        break;
-      }
-    }
-  }
-};
+static constexpr const auto atlas_cols = 1 << 2;
+static constexpr const auto atlas_rows = 1 << 2;
 
 struct uv {
-  float u0, v0;
-  float u1, v1;
+  dotz::vec2 uv0;
+  dotz::vec2 uv1;
 };
 struct uv_filler {
   static constexpr auto uv(unsigned n) {
-    constexpr const auto h = 1.0f / static_cast<float>(sprite_count);
-    return ms::uv{0, n * h, 1, (n + 1) * h};
+    constexpr const auto w = 1.0f / static_cast<float>(atlas_cols);
+    constexpr const auto h = 1.0f / static_cast<float>(atlas_rows);
+    constexpr const dotz::vec2 wh{w, h};
+
+    dotz::vec2 a{n % 4, n / 4};
+    dotz::vec2 b = a + 1.0f;
+
+    return ms::uv{a * wh, b * wh};
   }
 
   static constexpr auto uv(const cell &c) {
