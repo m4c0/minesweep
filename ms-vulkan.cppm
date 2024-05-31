@@ -90,6 +90,7 @@ struct vulkan : voo::casein_thread {
       extent_loop(dq.queue(), sw, [&] {
         sw.queue_one_time_submit(dq.queue(), [&](auto pcb) {
           auto scb = sw.cmd_render_pass(pcb);
+          auto pc = calculate_upc();
 
           vee::cmd_set_viewport(*scb, sw.extent());
           vee::cmd_set_scissor(*scb, sw.extent());

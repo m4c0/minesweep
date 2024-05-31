@@ -13,13 +13,13 @@ static void render() {
 }
 
 static void click() {
-  auto [x, y] = ms::pc.sel();
+  auto [x, y] = ms::calculate_upc().sel;
   g_cells.click(x, y);
   render();
 }
 
 static void flag() {
-  auto [x, y] = ms::pc.sel();
+  auto [x, y] = ms::calculate_upc().sel;
   g_cells.flag(x, y);
   render();
 }
