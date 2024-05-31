@@ -5,26 +5,21 @@ import :upc;
 import :vulkan;
 import casein;
 
-static void render() {
-  // ms::label::instance().update_bomb_count(g_cells.bomb_count());
-  ms::load_cells();
-}
-
 static void click() {
   auto [x, y] = ms::calculate_upc().sel;
   ms::grid::instance().click(x, y);
-  render();
+  ms::redraw();
 }
 
 static void flag() {
   auto [x, y] = ms::calculate_upc().sel;
   ms::grid::instance().flag(x, y);
-  render();
+  ms::redraw();
 }
 
 static void reset_level() {
   ms::grid::instance() = {};
-  render();
+  ms::redraw();
 }
 
 static struct init {

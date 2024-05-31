@@ -115,11 +115,12 @@ struct vulkan : voo::casein_thread {
   }
 };
 
-void load_cells() {
-  if (g_insts)
+void redraw() {
+  if (g_insts) {
     g_insts->run_once();
-  else
+  } else {
     vulkan::instance();
+  }
 }
 
 } // namespace ms
