@@ -18,6 +18,8 @@ static void load_insts(voo::h2l_buffer *b) {
 }
 static void load_label(voo::h2l_image *i) {}
 
+static voo::updater<voo::h2l_buffer> *g_insts{};
+
 namespace ms {
 struct vulkan : voo::casein_thread {
   static constexpr const auto label_size = 1024;
@@ -87,6 +89,8 @@ struct vulkan : voo::casein_thread {
       label.run_once();
       insts.run_once();
 
+      g_insts = &insts;
+
       extent_loop(dq.queue(), sw, [&] {
         sw.queue_one_time_submit(dq.queue(), [&](auto pcb) {
           auto scb = sw.cmd_render_pass(pcb);
@@ -113,4 +117,12 @@ struct vulkan : voo::casein_thread {
     return i;
   }
 };
+
+void load_cells() {
+  if (g_insts)
+    g_insts->run_once();
+  else
+    vulkan::instance();
+}
+
 } // namespace ms

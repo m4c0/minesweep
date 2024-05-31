@@ -1,15 +1,13 @@
 #pragma leco app
 export module ms;
 import :grid;
-import :label;
 import :upc;
 import :vulkan;
 import casein;
-import quack;
 
 static void render() {
-  // ms::vulkan::instance().load(&g_cells);
   // ms::label::instance().update_bomb_count(g_cells.bomb_count());
+  ms::load_cells();
 }
 
 static void click() {
@@ -33,13 +31,12 @@ static struct init {
   init() {
     using namespace casein;
     set_title("Minesweep");
-    handle(CREATE_WINDOW, reset_level);
     handle(KEY_DOWN, K_SPACE, reset_level);
     handle(MOUSE_DOWN, M_LEFT, click);
     handle(MOUSE_DOWN, M_RIGHT, flag);
     handle(GESTURE, G_TAP_1, click);
     // TODO: re-add long-press touch for flag
 
-    ms::vulkan::instance();
+    reset_level();
   }
 } i;
