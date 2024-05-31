@@ -9,7 +9,7 @@ import voo;
 
 using namespace traits::ints;
 
-static constexpr const auto cols = 1 << 2;
+static constexpr const auto cols = 1 << 3;
 static constexpr const auto rows = 1 << 2;
 
 static constexpr const unsigned image_w = 8 * cols;

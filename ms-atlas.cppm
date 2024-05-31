@@ -24,7 +24,7 @@ enum sprites {
   s_8,
   sprite_count
 };
-static constexpr const auto atlas_cols = 1 << 2;
+static constexpr const auto atlas_cols = 1 << 3;
 static constexpr const auto atlas_rows = 1 << 2;
 
 struct uv {
