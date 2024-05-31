@@ -14,7 +14,7 @@ static void load_atlas(voo::h2l_image *i) {
 }
 static void load_insts(voo::h2l_buffer *b) {
   voo::mapmem mem{b->host_memory()};
-  g_cells.load(static_cast<ms::inst *>(*mem));
+  ms::grid::instance().load(static_cast<ms::inst *>(*mem));
 }
 static void load_label(voo::h2l_image *i) {}
 

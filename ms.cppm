@@ -12,18 +12,18 @@ static void render() {
 
 static void click() {
   auto [x, y] = ms::calculate_upc().sel;
-  g_cells.click(x, y);
+  ms::grid::instance().click(x, y);
   render();
 }
 
 static void flag() {
   auto [x, y] = ms::calculate_upc().sel;
-  g_cells.flag(x, y);
+  ms::grid::instance().flag(x, y);
   render();
 }
 
 static void reset_level() {
-  g_cells = {};
+  ms::grid::instance() = {};
   render();
 }
 

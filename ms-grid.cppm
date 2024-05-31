@@ -136,7 +136,10 @@ public:
       }
     }
   }
+
+  static auto &instance() {
+    static grid i{};
+    return i;
+  }
 };
 } // namespace ms
-
-static ms::grid g_cells{};
