@@ -1,5 +1,6 @@
 export module ms:atlas;
 import dotz;
+import quack;
 
 namespace ms {
 struct cell {
@@ -27,10 +28,6 @@ enum sprites {
 static constexpr const auto atlas_cols = 1 << 3;
 static constexpr const auto atlas_rows = 1 << 2;
 
-struct uv {
-  dotz::vec2 uv0;
-  dotz::vec2 uv1;
-};
 struct uv_filler {
   static constexpr auto uv(unsigned n) {
     constexpr const auto w = 1.0f / static_cast<float>(atlas_cols);
@@ -40,7 +37,7 @@ struct uv_filler {
     dotz::vec2 a{n % 4, n / 4};
     dotz::vec2 b = a + 1.0f;
 
-    return ms::uv{a * wh, b * wh};
+    return quack::uv{a * wh, b * wh};
   }
 
   static constexpr auto uv(const cell &c) {

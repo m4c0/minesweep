@@ -1,24 +1,12 @@
 export module ms:grid;
 import :atlas;
 import rng;
+import quack;
 
 export namespace ms {
 constexpr const auto grid_size = 36;
 constexpr const auto max_bombs = grid_size * 4;
 constexpr const auto cells = grid_size * grid_size;
-
-struct rgba {
-  float r, g, b, a;
-};
-struct inst {
-  float pos[2];
-  uv uv;
-  rgba bg;
-};
-static_assert(sizeof(inst) == 10 * sizeof(float));
-
-constexpr const auto instance_size = sizeof(inst);
-constexpr const auto instance_buf_size = cells * instance_size;
 
 class grid {
   cell m_cells[cells]{};
@@ -115,26 +103,29 @@ public:
     }
   }
 
-  void load(inst *buf) const {
+  unsigned load(quack::mapped_buffers &all) const {
+    auto &[c, m, p, u] = all;
+
     for (auto i = 0; i < cells; i++) {
-      auto &b = buf[i];
-      const auto &c = m_cells[i];
+      const auto &cell = m_cells[i];
+      const float x = i % grid_size;
+      const float y = i / grid_size;
 
-      b.pos[0] = i % grid_size;
-      b.pos[1] = i / grid_size;
+      *u++ = uv_filler::uv(cell);
+      *p++ = {{x, y}, {1.0f, 1.0f}};
+      *m++ = {1, 1, 1, 1};
 
-      auto uv = uv_filler::uv(c);
-      b.uv = uv;
-
-      if (!c.visible) {
-        b.bg = {0, 0, 0, 1};
-      } else if (c.bomb) {
-        b.bg = {0.3, 0, 0, 1};
+      if (!cell.visible) {
+        *c++ = {0, 0, 0, 1};
+      } else if (cell.bomb) {
+        *c++ = {0.3, 0, 0, 1};
       } else {
-        float f = c.count / 8.0f;
-        b.bg = {0, f * 0.3f, 0, 1};
+        float f = cell.count / 8.0f;
+        *c++ = {0, f * 0.3f, 0, 1};
       }
     }
+
+    return cells;
   }
 
   static auto &instance() {
