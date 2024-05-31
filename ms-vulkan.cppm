@@ -27,10 +27,10 @@ void init_quack() {
   app_name("minesweep");
   max_quads(cells);
 
-  auto gs = dotz::vec2{grid_size} * 1.2;
+  auto cs = dotz::vec2{grid_size};
   push_constants({
-      .grid_pos = gs / 2.0f,
-      .grid_size = gs,
+      .grid_pos = cs * 0.5,
+      .grid_size = cs * 1.2,
   });
   atlas(my_atlas);
   data(update_data);
