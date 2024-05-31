@@ -14,12 +14,11 @@ static_assert(sizeof(upc) == 6 * sizeof(float));
 
 [[nodiscard]] upc calculate_upc() {
   auto grid_size = ms::grid_size;
-  dotz::vec2 mouse{casein::mouse_pos.x, casein::mouse_pos.y};
+  auto scr = casein::window_size;
+  auto mouse = casein::mouse_pos / scr;
 
   const auto m = grid_size * 0.1;
-  float scr_w = casein::window_size.x;
-  float scr_h = casein::window_size.y;
-  auto asp = scr_w / scr_h;
+  auto asp = scr.x / scr.y;
   auto aw = asp > 1 ? asp : 1;
   auto ah = asp > 1 ? 1 : asp;
 
