@@ -22,7 +22,7 @@ static void reset_level() {
   ms::redraw();
 }
 
-static struct init {
+struct init {
   init() {
     using namespace casein;
     set_title("Minesweep");
