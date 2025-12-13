@@ -16,3 +16,9 @@ namespace v {
     virtual void push(sprite s) = 0;
   };
 };
+
+#ifdef LECO_TARGET_WASM
+#pragma leco add_impl v_wasm
+#else
+#pragma leco add_impl v_vulkan
+#endif
