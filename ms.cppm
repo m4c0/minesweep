@@ -25,7 +25,8 @@ static void reset_level() {
 struct init {
   init() {
     using namespace casein;
-    set_title("Minesweep");
+    window_title = "Minesweep";
+
     handle(KEY_DOWN, K_SPACE, reset_level);
     handle(MOUSE_DOWN, M_LEFT, click);
     handle(MOUSE_DOWN, M_RIGHT, flag);

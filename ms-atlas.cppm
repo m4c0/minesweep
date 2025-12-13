@@ -1,6 +1,5 @@
 export module ms:atlas;
 import dotz;
-import quack;
 
 namespace ms {
 struct cell {
@@ -37,7 +36,7 @@ struct uv_filler {
     dotz::vec2 a{n % 4, n / 4};
     dotz::vec2 b = a + 1.0f;
 
-    return quack::uv{a * wh, b * wh};
+    return dotz::vec4 { a * wh, b * wh };
   }
 
   static constexpr auto uv(const cell &c) {

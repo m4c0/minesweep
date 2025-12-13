@@ -2,7 +2,6 @@ export module ms:upc;
 import :grid;
 import casein;
 import dotz;
-import quack;
 
 namespace ms {
 struct upc {

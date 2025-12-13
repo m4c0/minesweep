@@ -1,7 +1,7 @@
 export module ms:grid;
 import :atlas;
 import rng;
-import quack;
+import v;
 
 export namespace ms {
 constexpr const auto grid_size = 36;
@@ -70,6 +70,17 @@ class grid {
     }
   }
 
+  [[nodiscard]] static constexpr dotz::vec4 colour_of(cell cell) {
+    if (!cell.visible) {
+      return {0, 0, 0, 1};
+    } else if (cell.bomb) {
+      return {0.3, 0, 0, 1};
+    } else {
+      float f = cell.count / 8.0f;
+      return {0, f * 0.3f, 0, 1};
+    }
+  }
+
 public:
   grid() : m_cells{} {
     rng::seed();
@@ -103,26 +114,17 @@ public:
     }
   }
 
-  unsigned load(quack::mapped_buffers &all) const {
-    auto &[c, m, p, u] = all;
-
+  unsigned load(v::mapper * m) const {
     for (auto i = 0; i < cells; i++) {
       const auto &cell = m_cells[i];
       const float x = i % grid_size;
       const float y = i / grid_size;
 
-      *u++ = uv_filler::uv(cell);
-      *p++ = {{x, y}, {1.0f, 1.0f}};
-      *m++ = {1, 1, 1, 1};
-
-      if (!cell.visible) {
-        *c++ = {0, 0, 0, 1};
-      } else if (cell.bomb) {
-        *c++ = {0.3, 0, 0, 1};
-      } else {
-        float f = cell.count / 8.0f;
-        *c++ = {0, f * 0.3f, 0, 1};
-      }
+      m->push({
+        .pos { x, y },
+        .uvs = uv_filler::uv(cell),
+        .colour = colour_of(cell),
+      });
     }
 
     return cells;

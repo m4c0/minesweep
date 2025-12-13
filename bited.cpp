@@ -1,7 +1,6 @@
-#pragma leco app
+//#pragma leco app
 
 import casein;
-import quack;
 import silog;
 import stubby;
 import traits;
