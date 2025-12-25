@@ -3,21 +3,23 @@ import casein;
 import vinyl;
 import voo;
 
-struct app_stuff;
-struct sized_stuff;
-vinyl::v<app_stuff, sized_stuff> g;
+struct v::app_stuff : v::base_app_stuff {};
+struct v::sized_stuff : v::base_extent_stuff {
+  sized_stuff() : base_extent_stuff { vv::as() } {}
+};
 
-struct app_stuff {
-  voo::device_and_queue dq { "minesweep", casein::native_ptr };
-  vee::render_pass rp = voo::single_att_render_pass(dq);
-};
-struct sized_stuff {
-  voo::swapchain_and_stuff sw { g.as()->dq, *g.as()->rp };
-};
+static void on_frame() {
+  v::vv::ss()->frame([] {
+    auto cb = v::vv::ss()->sw.command_buffer();
+
+    v::upc pc {};
+
+    v::vv::ss()->clear({ 0, 0, 0, 1 });
+    v::vv::as()->ppl.cmd_draw(cb, &pc);
+  });
+}
 
 const int i = [] {
-  g.on_frame() = [] {};
-  g.setup();
-
+  v::vv::setup(on_frame);
   return 0;
 }();
