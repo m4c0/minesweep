@@ -32,7 +32,5 @@ struct init {
     handle(MOUSE_DOWN, M_RIGHT, flag);
     handle(GESTURE, G_TAP_1, click);
     // TODO: re-add long-press touch for flag
-
-    ms::init_quack();
   }
 } i;

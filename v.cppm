@@ -1,3 +1,7 @@
+#pragma leco add_resource "atlas.png"
+#pragma leco add_shader "ms.vert"
+#pragma leco add_shader "ms.frag"
+
 export module v;
 import clay;
 import dotz;
@@ -6,19 +10,14 @@ import sv;
 import vinyl;
 
 namespace v {
-  export struct sprite {
-    dotz::vec2 pos;
-    dotz::vec4 uvs;
-    dotz::vec4 colour;
-  };
   export struct upc {
     dotz::vec4 client_area;
     dotz::vec2 hover;
   };
-
-  export struct mapper {
-    virtual ~mapper() = default;
-    virtual void push(sprite s) = 0;
+  export struct sprite : upc {
+    dotz::vec2 pos;
+    dotz::vec4 uvs;
+    dotz::vec4 colour;
   };
 
   struct app_stuff;
@@ -45,6 +44,23 @@ namespace v {
 
     void render();
   };
+
+  export class mapper {
+  protected:
+    decltype(vv::as()->ppl.map()) m = vv::as()->ppl.map();
+    upc m_upc {};
+
+    void normalise(sprite & s);
+
+  public:
+    void set_upc(upc g) { m_upc = g; }
+    void push(sprite s) { 
+      static_cast<upc &>(s) = m_upc;
+      normalise(s);
+      m += s;
+    }
+  };
+  export hai::uptr<mapper> map() { return hai::uptr { new mapper {} }; }
 };
 
 module : private;
