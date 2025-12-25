@@ -8,6 +8,6 @@ void v::sized_stuff::render() {
 
   v::upc pc {};
 
-  v::vv::ss()->clear({ 0, 0, 0, 1 });
+  auto rp = v::vv::ss()->clear({ 0, 0, 0, 1 });
   v::vv::as()->ppl.cmd_draw(cb, &pc);
 }
