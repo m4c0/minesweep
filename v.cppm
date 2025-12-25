@@ -21,7 +21,11 @@ namespace v {
     virtual void push(sprite s) = 0;
   };
 
-  struct base_app_stuff : vinyl::base_app_stuff {
+  struct app_stuff;
+  struct sized_stuff;
+  using vv = vinyl::v<app_stuff, sized_stuff>;
+
+  struct app_stuff : vinyl::base_app_stuff {
     clay::das::pipeline<sprite> ppl {{
       .app = this,
       .shader = "ms",
@@ -34,15 +38,25 @@ namespace v {
       .push_constant = clay::vertex_push_constant<upc>(),
     }};
 
-    base_app_stuff() : vinyl::base_app_stuff { "Minesweep" } {}
+    app_stuff() : vinyl::base_app_stuff { "Minesweep" } {}
   };
-  struct base_extent_stuff : vinyl::base_extent_stuff {
-  };
+  struct sized_stuff : vinyl::base_extent_stuff {
+    sized_stuff() : base_extent_stuff { vv::as() } {}
 
-  struct app_stuff;
-  struct sized_stuff;
-  using vv = vinyl::v<app_stuff, sized_stuff>;
+    void render();
+  };
 };
+
+module : private;
+
+const int i = [] {
+  v::vv::setup([] {
+    v::vv::ss()->frame([] {
+      v::vv::ss()->render();
+    });
+  });
+  return 0;
+}();
 
 #ifdef LECO_TARGET_WASM
 #pragma leco add_impl v_wasm
