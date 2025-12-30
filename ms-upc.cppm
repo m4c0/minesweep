@@ -2,16 +2,10 @@ export module ms:upc;
 import :grid;
 import casein;
 import dotz;
+import v;
 
 namespace ms {
-struct upc {
-  dotz::vec2 area_pos{};
-  dotz::vec2 area_sz{};
-  dotz::vec2 sel{-1, -1};
-};
-static_assert(sizeof(upc) == 6 * sizeof(float));
-
-[[nodiscard]] upc calculate_upc() {
+[[nodiscard]] v::upc calculate_upc() {
   auto grid_size = ms::grid_size;
   auto scr = casein::window_size;
   auto mouse = casein::mouse_pos / scr;
@@ -28,10 +22,9 @@ static_assert(sizeof(upc) == 6 * sizeof(float));
   auto area_pos = (area_sz - grid_size) / 2;
   auto sel = dotz::floor(-area_pos + area_sz * mouse);
 
-  return upc{
-      .area_pos = area_pos,
-      .area_sz = area_sz,
-      .sel = sel,
+  return v::upc{
+    .client_area { area_pos, area_sz },
+    .hover = sel,
   };
 }
 } // namespace ms

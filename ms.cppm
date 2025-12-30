@@ -11,13 +11,13 @@ static void redraw() {
 }
 
 static void click() {
-  auto [x, y] = ms::calculate_upc().sel;
+  auto [x, y] = ms::calculate_upc().hover;
   ms::grid::instance().click(x, y);
   redraw();
 }
 
 static void flag() {
-  auto [x, y] = ms::calculate_upc().sel;
+  auto [x, y] = ms::calculate_upc().hover;
   ms::grid::instance().flag(x, y);
   redraw();
 }
@@ -37,8 +37,7 @@ extern "C" void casein_init() {
   handle(GESTURE, G_TAP_1, click);
   // TODO: re-add long-press touch for flag
 
-  dotz::vec2 cs { ms::grid_size };
-  v::pc.client_area = { cs * 0.5, cs * 1.2 };
+  v::pc = ms::calculate_upc();
 
   v::vv::setup([] {
     reset_level();

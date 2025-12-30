@@ -9,5 +9,5 @@ layout(location = 1) in vec4 frag_bg;
 
 void main() {
   vec4 rgba = texelFetch(tex, ivec2(frag_uv * vec2(8,4)), 0);
-  frag_colour = mix(frag_bg, rgba, rgba.a);
+  frag_colour = vec4(1, mix(frag_bg, rgba, rgba.a).yzw);
 }

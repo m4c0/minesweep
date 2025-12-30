@@ -14,6 +14,8 @@ namespace v {
     dotz::vec4 client_area;
     dotz::vec2 hover;
   } pc;
+  static_assert(sizeof(upc) == 6 * sizeof(float));
+
   export struct sprite {
     dotz::vec2 pos;
     dotz::vec4 uvs;
