@@ -27,7 +27,7 @@ static void reset_level() {
   redraw();
 }
 
-const int i = [] {
+extern "C" void casein_init() {
   using namespace casein;
   window_title = "Minesweep";
 
@@ -38,6 +38,4 @@ const int i = [] {
   // TODO: re-add long-press touch for flag
 
   v::setup(ms::grid_size);
-
-  return 0;
-}();
+}
