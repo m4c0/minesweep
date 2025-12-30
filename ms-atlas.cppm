@@ -24,19 +24,12 @@ enum sprites {
   s_8,
   sprite_count
 };
-static constexpr const auto atlas_cols = 1 << 3;
-static constexpr const auto atlas_rows = 1 << 2;
 
 struct uv_filler {
   static constexpr auto uv(unsigned n) {
-    constexpr const auto w = 1.0f / static_cast<float>(atlas_cols);
-    constexpr const auto h = 1.0f / static_cast<float>(atlas_rows);
-    constexpr const dotz::vec2 wh{w, h};
-
     dotz::vec2 a{n % 4, n / 4};
     dotz::vec2 b = a + 1.0f;
-
-    return dotz::vec4 { a * wh, b * wh };
+    return dotz::vec4 { a, b };
   }
 
   static constexpr auto uv(const cell &c) {
