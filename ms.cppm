@@ -2,25 +2,29 @@
 export module ms;
 import :grid;
 import :upc;
-import :vulkan;
 import casein;
 import v;
+
+static void redraw() {
+  auto m = v::map();
+  ms::grid::instance().load(&*m);
+}
 
 static void click() {
   auto [x, y] = ms::calculate_upc().sel;
   ms::grid::instance().click(x, y);
-  ms::redraw();
+  redraw();
 }
 
 static void flag() {
   auto [x, y] = ms::calculate_upc().sel;
   ms::grid::instance().flag(x, y);
-  ms::redraw();
+  redraw();
 }
 
 static void reset_level() {
   ms::grid::instance() = {};
-  ms::redraw();
+  redraw();
 }
 
 const int i = [] {
