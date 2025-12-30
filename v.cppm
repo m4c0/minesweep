@@ -10,7 +10,7 @@ import sv;
 import vinyl;
 
 namespace v {
-  extern struct upc {
+  export extern struct upc {
     dotz::vec4 client_area;
     dotz::vec2 hover;
   } pc;
@@ -22,7 +22,7 @@ namespace v {
 
   struct app_stuff;
   struct sized_stuff;
-  using vv = vinyl::v<app_stuff, sized_stuff>;
+  export using vv = vinyl::v<app_stuff, sized_stuff>;
 
   struct app_stuff : vinyl::base_app_stuff {
     clay::das::pipeline<sprite> ppl {{
@@ -58,17 +58,6 @@ namespace v {
     }
   };
   export hai::uptr<mapper> map() { return hai::uptr { new mapper {} }; }
-
-  export void setup(float grid_size) {
-    dotz::vec2 cs { grid_size };
-    pc.client_area = { cs * 0.5, cs * 1.2 };
-
-    vv::setup([] {
-      vv::ss()->frame([] {
-        vv::ss()->render();
-      });
-    });
-  }
 };
 
 module : private;
