@@ -33,7 +33,7 @@ const int i = [] {
   handle(GESTURE, G_TAP_1, click);
   // TODO: re-add long-press touch for flag
 
-  v::setup();
+  v::setup(ms::grid_size);
 
   return 0;
 }();

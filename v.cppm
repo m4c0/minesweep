@@ -10,11 +10,11 @@ import sv;
 import vinyl;
 
 namespace v {
-  export struct upc {
+  extern struct upc {
     dotz::vec4 client_area;
     dotz::vec2 hover;
-  };
-  export struct sprite : upc {
+  } pc;
+  export struct sprite {
     dotz::vec2 pos;
     dotz::vec4 uvs;
     dotz::vec4 colour;
@@ -48,28 +48,32 @@ namespace v {
   export class mapper {
   protected:
     decltype(vv::as()->ppl.map()) m = vv::as()->ppl.map();
-    upc m_upc {};
 
     void normalise(sprite & s);
 
   public:
-    void set_upc(upc g) { m_upc = g; }
     void push(sprite s) { 
-      static_cast<upc &>(s) = m_upc;
       normalise(s);
       m += s;
     }
   };
   export hai::uptr<mapper> map() { return hai::uptr { new mapper {} }; }
 
-  export void setup() {
-    v::vv::setup([] {
-      v::vv::ss()->frame([] {
-        v::vv::ss()->render();
+  export void setup(float grid_size) {
+    dotz::vec2 cs { grid_size };
+    pc.client_area = { cs * 0.5, cs * 1.2 };
+
+    vv::setup([] {
+      vv::ss()->frame([] {
+        vv::ss()->render();
       });
     });
   }
 };
+
+module : private;
+
+v::upc v::pc {};
 
 #ifdef LECO_TARGET_WASM
 #pragma leco add_impl v_wasm
