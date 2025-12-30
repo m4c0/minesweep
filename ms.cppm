@@ -4,6 +4,7 @@ import :grid;
 import :upc;
 import :vulkan;
 import casein;
+import v;
 
 static void click() {
   auto [x, y] = ms::calculate_upc().sel;
@@ -22,15 +23,17 @@ static void reset_level() {
   ms::redraw();
 }
 
-struct init {
-  init() {
-    using namespace casein;
-    window_title = "Minesweep";
+const int i = [] {
+  using namespace casein;
+  window_title = "Minesweep";
 
-    handle(KEY_DOWN, K_SPACE, reset_level);
-    handle(MOUSE_DOWN, M_LEFT, click);
-    handle(MOUSE_DOWN, M_RIGHT, flag);
-    handle(GESTURE, G_TAP_1, click);
-    // TODO: re-add long-press touch for flag
-  }
-} i;
+  handle(KEY_DOWN, K_SPACE, reset_level);
+  handle(MOUSE_DOWN, M_LEFT, click);
+  handle(MOUSE_DOWN, M_RIGHT, flag);
+  handle(GESTURE, G_TAP_1, click);
+  // TODO: re-add long-press touch for flag
+
+  v::setup();
+
+  return 0;
+}();

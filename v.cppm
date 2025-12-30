@@ -61,18 +61,15 @@ namespace v {
     }
   };
   export hai::uptr<mapper> map() { return hai::uptr { new mapper {} }; }
-};
 
-module : private;
-
-const int i = [] {
-  v::vv::setup([] {
-    v::vv::ss()->frame([] {
-      v::vv::ss()->render();
+  export void setup() {
+    v::vv::setup([] {
+      v::vv::ss()->frame([] {
+        v::vv::ss()->render();
+      });
     });
-  });
-  return 0;
-}();
+  }
+};
 
 #ifdef LECO_TARGET_WASM
 #pragma leco add_impl v_wasm
