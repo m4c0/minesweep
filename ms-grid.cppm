@@ -1,5 +1,6 @@
 export module ms:grid;
 import :atlas;
+import dotz;
 import rng;
 
 export namespace ms {
