@@ -3,6 +3,7 @@
 #pragma leco add_shader "ms.frag"
 
 export module v;
+import casein;
 import clay;
 import dotz;
 import hai;
@@ -60,11 +61,27 @@ namespace v {
     }
   };
   export hai::uptr<mapper> map() { return hai::uptr { new mapper {} }; }
+
+  using frame_t = void (*)();
+  export extern volatile frame_t frame;
+
+  export void on(auto e, auto k, void (*fn)()) {
+    casein::handle(e, k, [fn] { frame = fn; });
+  }
+  export void setup() {
+    vv::setup([] {
+      vv::ss()->frame([] {
+        frame();
+        vv::ss()->render();
+      });
+    });
+  }
 };
 
 module : private;
 
 v::upc v::pc {};
+volatile v::frame_t v::frame = [] {};
 
 #ifdef LECO_TARGET_WASM
 #pragma leco add_impl v_wasm

@@ -1,7 +1,8 @@
-//#pragma leco app
+#pragma leco app
 
 import casein;
 import dotz;
+import jojo;
 import silog;
 import stubby;
 import traits;
@@ -103,55 +104,38 @@ static void save() {
   silog::log(silog::info, "Atlas saved");
 }
 
-static constexpr bool sane_image_width(const stbi::image &img) {
-  return img.width <= image_w;
-}
-static constexpr bool sane_image_height(const stbi::image &img) {
-  return img.height <= image_h;
-}
-static constexpr bool sane_num_channels(const stbi::image &img) {
-  return img.num_channels == 4;
-}
-
 extern "C" void casein_init() {
-    using namespace casein;
+  using namespace casein;
 
-    handle(KEY_DOWN, K_DOWN, down);
-    handle(KEY_DOWN, K_UP, up);
-    handle(KEY_DOWN, K_LEFT, left);
-    handle(KEY_DOWN, K_RIGHT, right);
-    handle(KEY_DOWN, K_ENTER, save);
-    handle(KEY_DOWN, K_1, colour_1);
-    handle(KEY_DOWN, K_2, colour_2);
-    handle(KEY_DOWN, K_3, colour_3);
-    handle(KEY_DOWN, K_4, colour_4);
-    handle(KEY_DOWN, K_5, colour_5);
+  v::on(KEY_DOWN, K_DOWN, down);
+  v::on(KEY_DOWN, K_UP, up);
+  v::on(KEY_DOWN, K_LEFT, left);
+  v::on(KEY_DOWN, K_RIGHT, right);
+  v::on(KEY_DOWN, K_ENTER, save);
+  v::on(KEY_DOWN, K_1, colour_1);
+  v::on(KEY_DOWN, K_2, colour_2);
+  v::on(KEY_DOWN, K_3, colour_3);
+  v::on(KEY_DOWN, K_4, colour_4);
+  v::on(KEY_DOWN, K_5, colour_5);
 
-    handle(TIMER, &flip_cursor);
-
-    stbi::load("atlas.png")
-        .assert(sane_image_width, "image is wider than buffer")
-        .assert(sane_image_height, "image is taller than buffer")
-        .assert(sane_num_channels, "image is not RGBA")
-        .map([](auto &&img) {
-          auto *d = reinterpret_cast<uint32_t *>(*img.data);
-          for (auto y = 0; y < img.height; y++) {
-            for (auto x = 0; x < img.width; x++) {
-              g_pixies[y][x] = *d++;
-            }
-          }
-        })
-        .trace("loading atlas")
-        .log_error();
-
-    quack::upc upc{};
-    upc.grid_size = {image_w, image_h};
-    upc.grid_pos = upc.grid_size * 0.5;
-
-    using namespace quack::donald;
-    app_name("bited");
-    max_quads(quad_count);
-    push_constants(upc);
+  v::pc = v::upc {
+    .client_area { image_w, image_h, image_w / 2.0f, image_h / 2.0f },
+  };
+  v::frame = [] {
     refresh_atlas();
     refresh_batch();
+  };
+  v::setup();
+
+  auto img = stbi::load(jojo::slurp("atlas.png"));
+  if (img.width > image_w) silog::error("image too large");
+  if (img.height > image_h) silog::error("image too tall");
+  if (img.num_channels != 4) silog::error("image is not RGBA");
+
+  auto * d = reinterpret_cast<uint32_t *>(*img.data);
+  for (auto y = 0; y < img.height; y++) {
+    for (auto x = 0; x < img.width; x++) {
+      g_pixies[y][x] = *d++;
+    }
+  }
 }
