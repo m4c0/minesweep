@@ -5,20 +5,14 @@ import :upc;
 import casein;
 import v;
 
-struct game_parameters {
-  unsigned grid_size;
-  unsigned max_bombs;
-};
-static constexpr const game_parameters parameters[] {
+static constexpr const ms::game_parameters parameters[] {
   { .grid_size = 36, .max_bombs = 36 * 4 },
 };
-
-static constexpr const auto grid_size = 36;
 
 using frame_t = void (*)();
 static volatile frame_t frame;
 
-static ms::grid g_grid { grid_size };
+static ms::grid g_grid { parameters[0] };
 
 static void on(auto e, auto k, void (*fn)()) {
   casein::handle(e, k, [fn] { frame = fn; });
@@ -67,7 +61,7 @@ static void flag() {
 }
 
 static void reset_level() {
-  g_grid = { grid_size };
+  g_grid = { parameters[0] };
   frame = redraw;
 
   using namespace casein;

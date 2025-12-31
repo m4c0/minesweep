@@ -5,6 +5,11 @@ import hai;
 import rng;
 
 export namespace ms {
+  struct game_parameters {
+    unsigned grid_size;
+    unsigned max_bombs;
+  };
+
 class grid {
   unsigned m_grid_size;
   hai::array<cell> m_cells;
@@ -78,12 +83,12 @@ class grid {
   }
 
 public:
-  grid(unsigned grid_size) :
-    m_grid_size { grid_size }
-  , m_cells { grid_size * grid_size }
+  grid(game_parameters p) :
+    m_grid_size { p.grid_size }
+  , m_cells { p.grid_size * p.grid_size }
   {
     rng::seed();
-    setup_bombs(grid_size * 4);
+    setup_bombs(p.max_bombs);
     update_numbers();
   }
 
