@@ -25,16 +25,21 @@ static void redraw() {
 
 static void click() {
   auto [x, y] = ms::calculate_upc().hover;
-  g_grid.click(x, y);
-  frame = redraw;
-
-  if (g_grid.at(x, y).bomb) {
-    using namespace casein;
-    reset(MOUSE_MOVE);
-    reset_m(MOUSE_DOWN);
-    reset_g(GESTURE);
-    v::pc.hover = { -1 };
+  switch (g_grid.click(x, y)) {
+    using enum ms::grid::click_outcome;
+    case none: 
+    case fill: break;
+    case bomb: {
+      using namespace casein;
+      reset(MOUSE_MOVE);
+      reset_m(MOUSE_DOWN);
+      reset_g(GESTURE);
+      v::pc.hover = { -1 };
+      break;
+    }
   }
+
+  frame = redraw;
 }
 
 static void flag() {

@@ -92,10 +92,16 @@ public:
     return m_cells[y * grid_size + x];
   }
 
-  void click(int x, int y) {
+  enum class click_outcome { none, fill, bomb };
+  click_outcome click(int x, int y) {
+    using enum click_outcome;
+
     if (x >= 0 && y >= 0 && x < grid_size && y < grid_size) {
-      fill(x, y);
+      this->fill(x, y);
+      return at(x, y).bomb ? bomb : fill;
     }
+
+    return none;
   }
 
   void flag(int x, int y) {
