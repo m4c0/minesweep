@@ -27,9 +27,9 @@ enum sprites {
 
 struct uv_filler {
   static constexpr auto uv(unsigned n) {
-    dotz::vec2 a{n % 4, n / 4};
-    dotz::vec2 b = a + 1.0f;
-    return dotz::vec4 { a, b };
+    dotz::ivec2 a { n % 4, n / 4 };
+    dotz::ivec2 b = a + 1;
+    return dotz::ivec4 { a, b };
   }
 
   static constexpr auto uv(const cell &c) {
