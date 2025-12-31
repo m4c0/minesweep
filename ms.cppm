@@ -52,6 +52,9 @@ static void flag() {
 
 static void hover() {
   v::pc = ms::calculate_upc(grid_size);
+  if (!g_grid.can_hover(v::pc.hover.x, v::pc.hover.y)) {
+    v::pc.hover = -1;
+  }
   frame = redraw;
 }
 

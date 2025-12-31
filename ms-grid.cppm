@@ -73,6 +73,10 @@ class grid {
     }
   }
 
+  [[nodiscard]] constexpr cell &at(unsigned x, unsigned y) {
+    return m_cells[y * m_grid_size + x];
+  }
+
 public:
   grid(unsigned grid_size) :
     m_grid_size { grid_size }
@@ -83,8 +87,9 @@ public:
     update_numbers();
   }
 
-  [[nodiscard]] constexpr cell &at(unsigned x, unsigned y) {
-    return m_cells[y * m_grid_size + x];
+  bool can_hover(int x, int y) {
+    if (x < 0 || y < 0 || x >= m_grid_size || y >= m_grid_size) return false;
+    return !at(x, y).visible;
   }
 
   enum class click_outcome { none, fill, bomb };
