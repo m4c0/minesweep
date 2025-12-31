@@ -5,10 +5,12 @@ import :upc;
 import casein;
 import v;
 
+static constexpr const auto grid_size = 36;
+
 using frame_t = void (*)();
 static volatile frame_t frame;
 
-static ms::grid g_grid {};
+static ms::grid g_grid { grid_size };
 
 static void on(auto e, auto k, void (*fn)()) {
   casein::handle(e, k, [fn] { frame = fn; });
@@ -24,7 +26,7 @@ static void redraw() {
 }
 
 static void click() {
-  auto [x, y] = ms::calculate_upc().hover;
+  auto [x, y] = ms::calculate_upc(grid_size).hover;
   switch (g_grid.click(x, y)) {
     using enum ms::grid::click_outcome;
     case none: 
@@ -43,18 +45,19 @@ static void click() {
 }
 
 static void flag() {
-  auto [x, y] = ms::calculate_upc().hover;
+  auto [x, y] = ms::calculate_upc(grid_size).hover;
   g_grid.flag(x, y);
   frame = redraw;
 }
 
 static void hover() {
-  v::pc = ms::calculate_upc();
+  v::pc = ms::calculate_upc(grid_size);
   frame = redraw;
 }
 
 static void reset_level() {
-  g_grid = {};
+  g_grid = { grid_size };
+  v::pc = ms::calculate_upc(grid_size);
   frame = redraw;
 
   using namespace casein;
@@ -72,8 +75,6 @@ extern "C" void casein_init() {
   on(KEY_DOWN, K_SPACE, reset_level);
 
   frame = reset_level;
-
-  v::pc = ms::calculate_upc();
 
   v::vv::setup([] {
     v::vv::ss()->frame([] {
