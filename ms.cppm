@@ -26,6 +26,11 @@ static void flag() {
   frame = redraw;
 }
 
+static void hover() {
+  v::pc = ms::calculate_upc();
+  frame = redraw;
+}
+
 static void reset_level() {
   ms::grid::instance() = {};
   frame = redraw;
@@ -34,10 +39,15 @@ static void reset_level() {
 static void on(auto e, auto k, void (*fn)()) {
   casein::handle(e, k, [fn] { frame = fn; });
 }
+static void on(auto e, void (*fn)()) {
+  casein::handle(e, [fn] { frame = fn; });
+}
 
 extern "C" void casein_init() {
   using namespace casein;
   window_title = "Minesweep";
+
+  on(MOUSE_MOVE, hover);
 
   on(KEY_DOWN, K_SPACE, reset_level);
   on(MOUSE_DOWN, M_LEFT, click);
