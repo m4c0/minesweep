@@ -115,7 +115,7 @@ extern "C" void casein_init() {
   v::on(KEY_DOWN, K_5, colour_5);
 
   v::pc = v::upc {
-    .client_area { image_w, image_h, image_w / 2.0f, image_h / 2.0f },
+    .client_area { image_w / 2.0f, image_h / 2.0f, image_w, image_h },
   };
   v::frame = [] {
     refresh_atlas();
