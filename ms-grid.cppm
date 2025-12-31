@@ -115,6 +115,7 @@ public:
   }
 
   void load(auto & m) const {
+    int bombs = 0;
     for (auto i = 0; i < cells; i++) {
       const auto &cell = m_cells[i];
       const float x = i % grid_size;
@@ -125,6 +126,36 @@ public:
         .colour = colour_of(cell),
         .uv = uv(cell),
       });
+      if (cell.bomb) bombs++;
+      if (cell.flagged) bombs--;
+    }
+    if (bombs < 0) bombs = 0;
+
+    for (unsigned i = 0; i < 4; i++) {
+      m->push({
+        .pos { i, -2 },
+        .uv = s_label + i,
+      });
+    }
+    if (bombs == 0) {
+      m->push({
+        .pos { 4, -2 },
+        .uv = s_label_0,
+      });
+    } else {
+      unsigned n = 0;
+      unsigned acc = bombs;
+      while (acc) {
+        acc /= 10;
+        n++;
+      }
+      for (auto i = 0; i < n; i++) {
+        m->push({
+          .pos { 4 + n - i, -2 },
+          .uv = uv_label(bombs % 10),
+        });
+        bombs /= 10;
+      }
     }
   }
 };
