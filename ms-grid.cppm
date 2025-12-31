@@ -1,7 +1,6 @@
 export module ms:grid;
 import :atlas;
 import rng;
-import v;
 
 export namespace ms {
 constexpr const auto grid_size = 36;
@@ -114,7 +113,7 @@ public:
     }
   }
 
-  unsigned load(v::mapper * m) const {
+  void load(auto & m) const {
     for (auto i = 0; i < cells; i++) {
       const auto &cell = m_cells[i];
       const float x = i % grid_size;
@@ -126,13 +125,6 @@ public:
         .colour = colour_of(cell),
       });
     }
-
-    return cells;
-  }
-
-  static auto &instance() {
-    static grid i{};
-    return i;
   }
 };
 } // namespace ms

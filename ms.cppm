@@ -8,21 +8,23 @@ import v;
 using frame_t = void (*)();
 static volatile frame_t frame;
 
+static ms::grid g_grid {};
+
 static void redraw() {
   auto m = v::map();
-  ms::grid::instance().load(&*m);
+  g_grid.load(m);
   frame = []{};
 }
 
 static void click() {
   auto [x, y] = ms::calculate_upc().hover;
-  ms::grid::instance().click(x, y);
+  g_grid.click(x, y);
   frame = redraw;
 }
 
 static void flag() {
   auto [x, y] = ms::calculate_upc().hover;
-  ms::grid::instance().flag(x, y);
+  g_grid.flag(x, y);
   frame = redraw;
 }
 
@@ -32,7 +34,7 @@ static void hover() {
 }
 
 static void reset_level() {
-  ms::grid::instance() = {};
+  g_grid = {};
   frame = redraw;
 }
 
