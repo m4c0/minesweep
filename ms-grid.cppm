@@ -121,8 +121,8 @@ public:
 
       m->push({
         .pos { x, y },
-        .uvs = uv_filler::uv(cell),
         .colour = colour_of(cell),
+        .uv = uv(cell),
       });
     }
   }

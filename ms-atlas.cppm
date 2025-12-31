@@ -25,14 +25,10 @@ enum sprites {
   sprite_count
 };
 
-struct uv_filler {
-  static constexpr auto uv(unsigned n) { return dotz::ivec2 { n % 4, n / 4 }; }
-
-  static constexpr auto uv(const cell &c) {
-    if (!c.visible) return uv(c.flagged ? s_flagged : s_hidden);
-    if (c.bomb) return uv(s_bomb);
-    if (c.count >= 1 && c.count <= 8) return uv(s_1 + c.count - 1);
-    return uv(s_empty);
+  constexpr unsigned uv(const cell &c) {
+    if (!c.visible) return c.flagged ? s_flagged : s_hidden;
+    if (c.bomb) return s_bomb;
+    if (c.count >= 1 && c.count <= 8) return s_1 + c.count - 1;
+    return s_empty;
   }
-};
 } // namespace ms

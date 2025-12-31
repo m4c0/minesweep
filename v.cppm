@@ -18,8 +18,8 @@ namespace v {
 
   export struct sprite {
     dotz::vec2 pos;
-    dotz::vec2 uvs;
     dotz::vec4 colour;
+    unsigned uv;
   };
 
   struct app_stuff;
@@ -34,8 +34,8 @@ namespace v {
       .max_instances = 10240,
       .vertex_attributes = clay::buffer<sprite>::vertex_attributes(
           &sprite::pos,
-          &sprite::uvs,
-          &sprite::colour),
+          &sprite::colour,
+          &sprite::uv),
       .push_constant = clay::vertex_push_constant<upc>(),
     }};
 

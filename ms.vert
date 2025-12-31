@@ -6,8 +6,8 @@ layout(push_constant) uniform upc {
 } pc;
 
 layout(location = 0) in vec2 i_pos;
-layout(location = 1) in vec2 uv;
-layout(location = 2) in vec4 colour;
+layout(location = 1) in vec4 colour;
+layout(location = 2) in uint uv;
 
 layout(location = 0) out vec2 frag_uv;
 layout(location = 1) out vec4 frag_bg;
@@ -18,6 +18,6 @@ void main() {
   vec2 p = (v_pos + i_pos + pc.client_area.xy) / pc.client_area.zw;
   p = 2.0 * p - 1.0;
   gl_Position = vec4(p, 0, 1);
-  frag_uv = uv.xy + v_pos;
+  frag_uv = ivec2(uv % 4, uv / 4) + v_pos;
   frag_bg = i_pos == pc.hover ? vec4(0.4, 0.5, 0.6, 1.0) : colour;
 }
