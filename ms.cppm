@@ -27,14 +27,22 @@ static void on(auto e, void (*fn)()) {
   casein::handle(e, [fn] { frame = fn; });
 }
 
+static auto upc() {
+  return ms::calculate_upc(g_grid.grid_size());
+}
+
 static void redraw() {
+  auto pc = upc();
+  if (!g_grid.can_hover(pc.hover.x, pc.hover.y)) pc.hover = -1;
+  v::pc = pc;
+
   auto m = v::map();
   g_grid.load(m);
   frame = []{};
 }
 
 static void click() {
-  auto [x, y] = ms::calculate_upc(grid_size).hover;
+  auto [x, y] = upc().hover;
   switch (g_grid.click(x, y)) {
     using enum ms::grid::click_outcome;
     case none: 
@@ -53,26 +61,17 @@ static void click() {
 }
 
 static void flag() {
-  auto [x, y] = ms::calculate_upc(grid_size).hover;
+  auto [x, y] = upc().hover;
   g_grid.flag(x, y);
-  frame = redraw;
-}
-
-static void hover() {
-  v::pc = ms::calculate_upc(grid_size);
-  if (!g_grid.can_hover(v::pc.hover.x, v::pc.hover.y)) {
-    v::pc.hover = -1;
-  }
   frame = redraw;
 }
 
 static void reset_level() {
   g_grid = { grid_size };
-  v::pc = ms::calculate_upc(grid_size);
   frame = redraw;
 
   using namespace casein;
-  on(MOUSE_MOVE, hover);
+  on(MOUSE_MOVE, redraw);
   on(MOUSE_DOWN, M_LEFT, click);
   on(MOUSE_DOWN, M_RIGHT, flag);
   on(GESTURE, G_TAP_1, click);

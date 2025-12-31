@@ -87,6 +87,8 @@ public:
     update_numbers();
   }
 
+  constexpr auto grid_size() const { return m_grid_size; }
+
   bool can_hover(int x, int y) {
     if (x < 0 || y < 0 || x >= m_grid_size || y >= m_grid_size) return false;
     return !at(x, y).visible;
