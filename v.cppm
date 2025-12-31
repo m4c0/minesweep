@@ -18,7 +18,7 @@ namespace v {
 
   export struct sprite {
     dotz::vec2 pos;
-    dotz::vec4 uvs;
+    dotz::vec2 uvs;
     dotz::vec4 colour;
   };
 
