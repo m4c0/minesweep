@@ -68,6 +68,10 @@ namespace v {
   export void on(auto e, auto k, void (*fn)()) {
     casein::handle(e, k, [fn] { frame = fn; });
   }
+  export void on(auto e, void (*fn)()) {
+    casein::handle(e, [fn] { frame = fn; });
+  }
+
   export void setup() {
     vv::setup([] {
       vv::ss()->frame([] {

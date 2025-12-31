@@ -9,17 +9,7 @@ static constexpr const ms::game_parameters parameters[] {
   { .grid_size = 36, .max_bombs = 36 * 4 },
 };
 
-using frame_t = void (*)();
-static volatile frame_t frame;
-
 static ms::grid g_grid { parameters[0] };
-
-static void on(auto e, auto k, void (*fn)()) {
-  casein::handle(e, k, [fn] { frame = fn; });
-}
-static void on(auto e, void (*fn)()) {
-  casein::handle(e, [fn] { frame = fn; });
-}
 
 static auto upc() {
   return ms::calculate_upc(g_grid.grid_size());
@@ -32,7 +22,7 @@ static void redraw() {
 
   auto m = v::map();
   g_grid.load(m);
-  frame = []{};
+  v::frame = []{};
 }
 
 static void click() {
@@ -51,24 +41,24 @@ static void click() {
     }
   }
 
-  frame = redraw;
+  v::frame = redraw;
 }
 
 static void flag() {
   auto [x, y] = upc().hover;
   g_grid.flag(x, y);
-  frame = redraw;
+  v::frame = redraw;
 }
 
 static void reset_level() {
   g_grid = { parameters[0] };
-  frame = redraw;
+  v::frame = redraw;
 
   using namespace casein;
-  on(MOUSE_MOVE, redraw);
-  on(MOUSE_DOWN, M_LEFT, click);
-  on(MOUSE_DOWN, M_RIGHT, flag);
-  on(GESTURE, G_TAP_1, click);
+  v::on(MOUSE_MOVE, redraw);
+  v::on(MOUSE_DOWN, M_LEFT, click);
+  v::on(MOUSE_DOWN, M_RIGHT, flag);
+  v::on(GESTURE, G_TAP_1, click);
   // TODO: re-add long-press touch for flag
 }
 
@@ -76,14 +66,8 @@ extern "C" void casein_init() {
   using namespace casein;
   window_title = "Minesweep";
 
-  on(KEY_DOWN, K_SPACE, reset_level);
+  v::on(KEY_DOWN, K_SPACE, reset_level);
 
-  frame = reset_level;
-
-  v::vv::setup([] {
-    v::vv::ss()->frame([] {
-      frame();
-      v::vv::ss()->render();
-    });
-  });
+  v::frame = reset_level;
+  v::setup();
 }

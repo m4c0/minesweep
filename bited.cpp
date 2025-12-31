@@ -16,7 +16,6 @@ static constexpr const auto rows = 1 << 2;
 
 static constexpr const unsigned image_w = 8 * cols;
 static constexpr const unsigned image_h = 8 * rows;
-static constexpr const unsigned quad_count = 1 + (rows * cols);
 
 static unsigned g_cursor_x{};
 static unsigned g_cursor_y{};
@@ -51,11 +50,8 @@ static void refresh_batch() {
       };
     }
   }
-}
 
-static void flip_cursor() {
   g_cursor_hl = !g_cursor_hl;
-  refresh_batch();
 }
 
 static void down() {
