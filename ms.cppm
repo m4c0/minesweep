@@ -40,7 +40,11 @@ extern "C" void casein_init() {
   v::pc = ms::calculate_upc();
 
   v::vv::setup([] {
-    reset_level();
+    static bool reset = true;
+    if (reset) {
+      reset_level();
+      reset = false;
+    }
 
     v::vv::ss()->frame([] {
       v::vv::ss()->render();
