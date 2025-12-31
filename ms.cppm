@@ -5,6 +5,14 @@ import :upc;
 import casein;
 import v;
 
+struct game_parameters {
+  unsigned grid_size;
+  unsigned max_bombs;
+};
+static constexpr const game_parameters parameters[] {
+  { .grid_size = 36, .max_bombs = 36 * 4 },
+};
+
 static constexpr const auto grid_size = 36;
 
 using frame_t = void (*)();
