@@ -59,33 +59,33 @@ static void down() {
     return;
 
   g_cursor_y++;
-  refresh_batch();
+  v::frame = refresh_batch;
 }
 static void up() {
   if (g_cursor_y == 0)
     return;
 
   g_cursor_y--;
-  refresh_batch();
+  v::frame = refresh_batch;
 }
 static void left() {
   if (g_cursor_x == 0)
     return;
 
   g_cursor_x--;
-  refresh_batch();
+  v::frame = refresh_batch;
 }
 static void right() {
   if (g_cursor_x >= image_w - 1)
     return;
 
   g_cursor_x++;
-  refresh_batch();
+  v::frame = refresh_batch;
 }
 
 static void colour(uint32_t c) {
   g_pixies[g_cursor_y][g_cursor_x] = c;
-  refresh_atlas();
+  v::frame = refresh_atlas;
 }
 static void colour_1() { colour(0x0); }
 static void colour_2() { colour(0xFF0000FF); }
@@ -115,7 +115,7 @@ extern "C" void casein_init() {
   v::on(KEY_DOWN, K_5, colour_5);
 
   v::pc = v::upc {
-    .client_area { image_w / 2.0f, image_h / 2.0f, image_w, image_h },
+    .client_area { 0, 0, image_w, image_h },
   };
   v::frame = [] {
     refresh_atlas();
