@@ -1,9 +1,11 @@
 //#pragma leco app
 
 import casein;
+import dotz;
 import silog;
 import stubby;
 import traits;
+import v;
 import voo;
 
 using namespace traits::ints;
@@ -20,49 +22,35 @@ static unsigned g_cursor_y{};
 static bool g_cursor_hl{};
 static uint32_t g_pixies[image_h][image_w]{};
 
-static void update_atlas(voo::h2l_image *img) {
-  voo::mapmem m{img->host_memory()};
-  auto *buf = static_cast<uint32_t *>(*m);
+static void refresh_atlas() {
+  auto & img = v::vv::as()->ppl.texture().img;
+  auto buf = voo::bound_buffer::create_from_host(image_w * image_h * 4);
+  voo::mapmem m { *buf.memory };
+  auto * ptr = static_cast<uint32_t *>(*m);
   for (auto y = 0; y < image_h; y++) {
-    for (auto x = 0; x < image_w; x++, buf++) {
-      *buf = g_pixies[y][x];
+    for (auto x = 0; x < image_w; x++, ptr++) {
+      *ptr = g_pixies[y][x];
+    }
+  }
+  voo::copy_buffer_to_image_sync({ image_w, image_h }, *buf.buffer, *img.img);
+}
+
+static void refresh_batch() {
+  static constexpr dotz::vec4 nrm { 0 };
+  static constexpr dotz::vec4 hgl { 1, 0, 0, 1 };
+
+  auto m = v::vv::as()->ppl.map();
+  for (auto y = 0U; y < rows; y++) {
+    for (auto x = 0U; x < cols; x++) {
+      bool hl = y == g_cursor_y && x == g_cursor_x;
+      m += {
+        .pos { x, y },
+        .colour = hl ? hgl : nrm,
+        .uv = y * rows + x,
+      };
     }
   }
 }
-
-static quack::donald::atlas_t *bitmap(voo::device_and_queue *dq) {
-  return new quack::donald::atlas_t{dq->queue(), &update_atlas,
-                                    dq->physical_device(), image_w, image_h};
-}
-
-static unsigned update_data(quack::mapped_buffers all) {
-  static constexpr const float inv_c = 1.0f / cols;
-  static constexpr const float inv_r = 1.0f / rows;
-  auto [c, m, p, u] = all;
-  for (auto y = 0; y < rows; y++) {
-    for (auto x = 0; x < cols; x++) {
-      *c++ = {0, 0, 0, 1};
-      *m++ = {1, 1, 1, 1};
-      *p++ = {{x * 8.0f + 0.1f, y * 8.0f + 0.1f}, {8 - 0.2f, 8 - 0.2f}};
-      *u++ = {{x * inv_c, y * inv_r}, {(x + 1) * inv_c, (y + 1) * inv_r}};
-    }
-  }
-
-  if (g_cursor_hl) {
-    *c++ = {0, 0, 0, 0};
-  } else {
-    *c++ = {1, 0, 0, 1};
-  }
-  *m++ = {1, 1, 1, 0};
-  *p++ = {{static_cast<float>(g_cursor_x), static_cast<float>(g_cursor_y)},
-          {1, 1}};
-  *u++ = {};
-
-  return quad_count;
-}
-
-void refresh_atlas() { quack::donald::atlas(bitmap); }
-void refresh_batch() { quack::donald::data(update_data); }
 
 static void flip_cursor() {
   g_cursor_hl = !g_cursor_hl;
@@ -125,8 +113,7 @@ static constexpr bool sane_num_channels(const stbi::image &img) {
   return img.num_channels == 4;
 }
 
-struct init {
-  init() {
+extern "C" void casein_init() {
     using namespace casein;
 
     handle(KEY_DOWN, K_DOWN, down);
@@ -167,5 +154,4 @@ struct init {
     push_constants(upc);
     refresh_atlas();
     refresh_batch();
-  }
-} i;
+}
