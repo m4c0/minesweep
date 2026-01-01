@@ -61,31 +61,19 @@ static void refresh_batch() {
 }
 
 static void down() {
-  if (g_cursor_y >= image_h - 1)
-    return;
-
-  g_cursor_y++;
+  if (g_cursor_y < image_h - 1) g_cursor_y++;
   v::frame = refresh_batch;
 }
 static void up() {
-  if (g_cursor_y == 0)
-    return;
-
-  g_cursor_y--;
+  if (g_cursor_y > 0) g_cursor_y--;
   v::frame = refresh_batch;
 }
 static void left() {
-  if (g_cursor_x == 0)
-    return;
-
-  g_cursor_x--;
+  if (g_cursor_x > 0) g_cursor_x--;
   v::frame = refresh_batch;
 }
 static void right() {
-  if (g_cursor_x >= image_w - 1)
-    return;
-
-  g_cursor_x++;
+  if (g_cursor_x < image_w - 1) g_cursor_x++;
   v::frame = refresh_batch;
 }
 
@@ -104,6 +92,7 @@ static void save() {
   auto *pix = reinterpret_cast<stbi::pixel *>(g_pixies);
   stbi::write_rgba_unsafe("atlas.png", image_w, image_h, pix);
   silog::log(silog::info, "Atlas saved");
+  v::frame = refresh_batch;
 }
 
 extern "C" void casein_init() {
