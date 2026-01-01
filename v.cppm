@@ -63,7 +63,7 @@ namespace v {
   export hai::uptr<mapper> map() { return hai::uptr { new mapper {} }; }
 
   using frame_t = void (*)();
-  export extern volatile frame_t frame;
+  export extern _Atomic frame_t frame;
 
   export void on(auto e, auto k, void (*fn)()) {
     casein::handle(e, k, [fn] { frame = fn; });
@@ -85,7 +85,7 @@ namespace v {
 module : private;
 
 v::upc v::pc {};
-volatile v::frame_t v::frame = [] {};
+_Atomic v::frame_t v::frame = [] {};
 
 #ifdef LECO_TARGET_WASM
 #pragma leco add_impl v_wasm

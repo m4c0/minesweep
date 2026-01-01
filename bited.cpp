@@ -97,6 +97,11 @@ static void save() {
   v::frame = refresh_batch;
 }
 
+static void init() {
+  refresh_atlas();
+  refresh_batch();
+}
+
 extern "C" void casein_init() {
   using namespace casein;
 
@@ -115,10 +120,7 @@ extern "C" void casein_init() {
     .client_area { 0, 0, image_w, image_h },
     .hover = -1,
   };
-  v::frame = [] {
-    refresh_atlas();
-    refresh_batch();
-  };
+  v::frame = init;
   v::setup();
 
   auto img = stbi::load(jojo::slurp("atlas.png"));

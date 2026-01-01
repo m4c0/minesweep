@@ -24,6 +24,7 @@ static auto upc() {
   return ms::calculate_upc(grid().grid_size());
 }
 
+static void none() {}
 static void redraw() {
   auto pc = upc();
   if (!grid().can_hover(pc.hover.x, pc.hover.y)) pc.hover = -1;
@@ -31,7 +32,7 @@ static void redraw() {
 
   auto m = v::map();
   grid().load(m);
-  v::frame = []{};
+  v::frame = none;
 }
 
 static void click() {
