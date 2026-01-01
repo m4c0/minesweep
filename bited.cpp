@@ -111,6 +111,7 @@ extern "C" void casein_init() {
 
   v::pc = v::upc {
     .client_area { 0, 0, image_w, image_h },
+    .hover = -1,
   };
   v::frame = [] {
     refresh_atlas();
