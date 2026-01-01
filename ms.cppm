@@ -72,6 +72,9 @@ static void reset_level() {
 
   v::on(KEY_DOWN, K_1, [] { g_diff = 0; v::frame = redraw; });
   v::on(KEY_DOWN, K_2, [] { g_diff = 1; v::frame = redraw; });
+
+  // TODO: save/load
+  // TODO: click difficulty to switch
 }
 
 extern "C" void casein_init() {
