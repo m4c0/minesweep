@@ -1,9 +1,23 @@
 module v;
+import gelo;
 
 void v::sized_stuff::render() {
+  using namespace gelo;
+
   if (!vv::as()->ppl) return;
 
-  // TODO: upc
+  static unsigned u_client_area = 0;
+  static unsigned u_hover = 0;
+  if (!u_client_area) {
+    auto p = v::vv::as()->ppl.program();
+    u_client_area = get_uniform_location(p, "pc.client_area");
+    u_hover = get_uniform_location(p, "pc.hover");
+  }
+
+  auto ca = pc.client_area;
+  ca.w *= -1;
+  uniform4fv(u_client_area, ca);
+  uniform2fv(u_hover, pc.hover);
 
   vv::ss()->clear({ 0, 0, 0, 1 });
   vv::as()->ppl.cmd_draw();
