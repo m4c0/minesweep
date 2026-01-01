@@ -6,12 +6,13 @@ import rng;
 
 export namespace ms {
   struct game_parameters {
+    unsigned difficulty;
     unsigned grid_size;
     unsigned max_bombs;
   };
 
 class grid {
-  unsigned m_grid_size;
+  game_parameters m_p;
   hai::array<cell> m_cells;
 
   void setup_bombs(unsigned max_bombs) {
@@ -27,8 +28,8 @@ class grid {
   }
 
   void update_numbers() {
-    for (auto y = 0; y < m_grid_size; y++) {
-      for (auto x = 0; x < m_grid_size; x++) {
+    for (auto y = 0; y < grid_size(); y++) {
+      for (auto x = 0; x < grid_size(); x++) {
         update_numbers_at(x, y);
       }
     }
@@ -39,10 +40,10 @@ class grid {
 
     for (auto dy = -1; dy <= 1; dy++) {
       const auto ny = y + dy;
-      if ((ny < 0) || (ny >= m_grid_size)) continue;
+      if ((ny < 0) || (ny >= grid_size())) continue;
       for (auto dx = -1; dx <= 1; dx++) {
         const auto nx = x + dx;
-        if ((nx < 0) || (nx >= m_grid_size)) continue;
+        if ((nx < 0) || (nx >= grid_size())) continue;
         if (at(nx, ny).bomb) at(x, y).count++;
       }
     }
@@ -58,10 +59,10 @@ class grid {
 
     for (auto dx = -1; dx <= 1; dx++) {
       auto nx = x + dx;
-      if (nx < 0 || nx >= m_grid_size) continue;
+      if (nx < 0 || nx >= grid_size()) continue;
       for (auto dy = -1; dy <= 1; dy++) {
         auto ny = y + dy;
-        if (ny < 0 || ny >= m_grid_size) continue;
+        if (ny < 0 || ny >= grid_size()) continue;
         fill(nx, ny);
       }
     }
@@ -79,12 +80,12 @@ class grid {
   }
 
   [[nodiscard]] constexpr cell &at(unsigned x, unsigned y) {
-    return m_cells[y * m_grid_size + x];
+    return m_cells[y * grid_size() + x];
   }
 
 public:
   grid(game_parameters p) :
-    m_grid_size { p.grid_size }
+    m_p { p }
   , m_cells { p.grid_size * p.grid_size }
   {
     rng::seed();
@@ -92,10 +93,10 @@ public:
     update_numbers();
   }
 
-  constexpr auto grid_size() const { return m_grid_size; }
+  constexpr unsigned grid_size() const { return m_p.grid_size; }
 
   bool can_hover(int x, int y) {
-    if (x < 0 || y < 0 || x >= m_grid_size || y >= m_grid_size) return false;
+    if (x < 0 || y < 0 || x >= grid_size() || y >= m_p.grid_size) return false;
     return !at(x, y).visible;
   }
 
@@ -103,7 +104,7 @@ public:
   click_outcome click(int x, int y) {
     using enum click_outcome;
 
-    if (x >= 0 && y >= 0 && x < m_grid_size && y < m_grid_size) {
+    if (x >= 0 && y >= 0 && x < grid_size() && y < m_p.grid_size) {
       this->fill(x, y);
       return at(x, y).bomb ? bomb : fill;
     }
@@ -112,7 +113,7 @@ public:
   }
 
   void flag(int x, int y) {
-    if (x >= 0 && y >= 0 && x < m_grid_size && y < m_grid_size) {
+    if (x >= 0 && y >= 0 && x < grid_size() && y < m_p.grid_size) {
       auto &g = at(x, y);
       g.flagged = !g.flagged;
     }
@@ -122,8 +123,8 @@ public:
     int bombs = 0;
     for (auto i = 0; i < m_cells.size(); i++) {
       const auto &cell = m_cells[i];
-      const float x = i % m_grid_size;
-      const float y = i / m_grid_size;
+      const float x = i % grid_size();
+      const float y = i / grid_size();
 
       m->push({
         .pos { x, y },
@@ -164,8 +165,8 @@ public:
 
     for (auto i = 0U; i < 4; i++) {
       m->push({
-        .pos { m_grid_size + i - 4, -2 },
-        .uv = s_crazy + i,
+        .pos { grid_size() + i - 4, -2 },
+        .uv = m_p.difficulty + i,
       });
     }
   }

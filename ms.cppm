@@ -6,7 +6,7 @@ import casein;
 import v;
 
 static constexpr const ms::game_parameters parameters[] {
-  { .grid_size = 36, .max_bombs = 36 * 4 },
+  { .difficulty = ms::s_crazy, .grid_size = 36, .max_bombs = 36 * 4 },
 };
 
 static ms::grid g_grid { parameters[0] };
