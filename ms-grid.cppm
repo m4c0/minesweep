@@ -53,6 +53,7 @@ class grid {
     auto &p = at(x, y);
     if (p.visible) return;
 
+    p.flagged = false;
     p.visible = true;
 
     if (p.count != 0 || p.bomb) return;
