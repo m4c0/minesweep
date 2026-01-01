@@ -15,8 +15,9 @@ static ms::grid g_grid[] {
   { parameters[1] },
 };
 
+static unsigned g_diff = 0;
 static auto & grid() {
-  return g_grid[0];
+  return g_grid[g_diff];
 }
 
 static auto upc() {
@@ -68,6 +69,9 @@ static void reset_level() {
   v::on(MOUSE_DOWN, M_RIGHT, flag);
   v::on(GESTURE, G_TAP_1, click);
   // TODO: re-add long-press touch for flag
+
+  v::on(KEY_DOWN, K_1, [] { g_diff = 0; v::frame = redraw; });
+  v::on(KEY_DOWN, K_2, [] { g_diff = 1; v::frame = redraw; });
 }
 
 extern "C" void casein_init() {
