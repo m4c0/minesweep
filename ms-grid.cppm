@@ -88,9 +88,12 @@ public:
   grid(game_parameters p) :
     m_p { p }
   , m_cells { p.grid_size * p.grid_size }
-  {
+  { reset(); }
+
+  void reset() {
     rng::seed();
-    setup_bombs(p.max_bombs);
+    for (auto & c : m_cells) c = {};
+    setup_bombs(m_p.max_bombs);
     update_numbers();
   }
 

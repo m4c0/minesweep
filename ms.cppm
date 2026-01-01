@@ -6,28 +6,36 @@ import casein;
 import v;
 
 static constexpr const ms::game_parameters parameters[] {
+  { .difficulty = ms::s_easy,  .grid_size = 10, .max_bombs = 8 },
   { .difficulty = ms::s_crazy, .grid_size = 36, .max_bombs = 36 * 4 },
 };
 
-static ms::grid g_grid { parameters[0] };
+static ms::grid g_grid[] {
+  { parameters[0] },
+  { parameters[1] },
+};
+
+static auto & grid() {
+  return g_grid[0];
+}
 
 static auto upc() {
-  return ms::calculate_upc(g_grid.grid_size());
+  return ms::calculate_upc(grid().grid_size());
 }
 
 static void redraw() {
   auto pc = upc();
-  if (!g_grid.can_hover(pc.hover.x, pc.hover.y)) pc.hover = -1;
+  if (!grid().can_hover(pc.hover.x, pc.hover.y)) pc.hover = -1;
   v::pc = pc;
 
   auto m = v::map();
-  g_grid.load(m);
+  grid().load(m);
   v::frame = []{};
 }
 
 static void click() {
   auto [x, y] = upc().hover;
-  switch (g_grid.click(x, y)) {
+  switch (grid().click(x, y)) {
     using enum ms::grid::click_outcome;
     case none: 
     case fill: break;
@@ -46,12 +54,12 @@ static void click() {
 
 static void flag() {
   auto [x, y] = upc().hover;
-  g_grid.flag(x, y);
+  grid().flag(x, y);
   v::frame = redraw;
 }
 
 static void reset_level() {
-  g_grid = { parameters[0] };
+  grid().reset();
   v::frame = redraw;
 
   using namespace casein;
