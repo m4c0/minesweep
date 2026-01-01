@@ -161,6 +161,13 @@ public:
         bombs /= 10;
       }
     }
+
+    for (auto i = 0U; i < 4; i++) {
+      m->push({
+        .pos { m_grid_size + i - 4, -2 },
+        .uv = s_crazy + i,
+      });
+    }
   }
 };
 } // namespace ms
