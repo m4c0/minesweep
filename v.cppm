@@ -7,6 +7,8 @@ import casein;
 import clay;
 import dotz;
 import hai;
+import mainloop;
+import mtx;
 import sv;
 import vinyl;
 
@@ -63,19 +65,37 @@ namespace v {
   export hai::uptr<mapper> map() { return hai::uptr { new mapper {} }; }
 
   using frame_t = void (*)();
-  export extern _Atomic frame_t frame;
+  extern _Atomic frame_t g_frame;
 
-  export void on(auto e, auto k, void (*fn)()) {
-    casein::handle(e, k, [fn] { frame = fn; });
+  export void frame(frame_t f) { g_frame = f; }
+
+  mtx::mutex g_mutex {};
+
+  export template<mainloop::fn_t Fn> inline void push() {
+    mainloop::push([] {
+      mtx::lock l { &g_mutex };
+      Fn();
+    });
   }
-  export void on(auto e, void (*fn)()) {
-    casein::handle(e, [fn] { frame = fn; });
+
+  export
+  template<casein::event_type E, auto K, mainloop::fn_t Fn>
+  inline void on() {
+    casein::handle(E, K, [] { push<Fn>(); });
+  }
+  export
+  template<casein::event_type E, mainloop::fn_t Fn>
+  inline void on() {
+    casein::handle(E, [] { push<Fn>(); });
   }
 
   export void setup() {
     vv::setup([] {
       vv::ss()->frame([] {
-        frame();
+        {
+          mtx::lock l { &g_mutex };
+          g_frame();
+        }
         vv::ss()->render();
       });
     });
@@ -85,7 +105,7 @@ namespace v {
 module : private;
 
 v::upc v::pc {};
-_Atomic v::frame_t v::frame = [] {};
+_Atomic v::frame_t v::g_frame = [] {};
 
 #ifdef LECO_TARGET_WASM
 #pragma leco add_impl v_wasm

@@ -64,24 +64,24 @@ static void refresh_batch() {
 
 static void down() {
   if (g_cursor_y < image_h - 1) g_cursor_y++;
-  v::frame = refresh_batch;
+  v::frame(refresh_batch);
 }
 static void up() {
   if (g_cursor_y > 0) g_cursor_y--;
-  v::frame = refresh_batch;
+  v::frame(refresh_batch);
 }
 static void left() {
   if (g_cursor_x > 0) g_cursor_x--;
-  v::frame = refresh_batch;
+  v::frame(refresh_batch);
 }
 static void right() {
   if (g_cursor_x < image_w - 1) g_cursor_x++;
-  v::frame = refresh_batch;
+  v::frame(refresh_batch);
 }
 
 static void colour(uint32_t c) {
   g_pixies[g_cursor_y][g_cursor_x] = c;
-  v::frame = refresh_atlas;
+  v::frame(refresh_atlas);
 }
 static void colour_1() { colour(0x0); }
 static void colour_2() { colour(0xFF0000FF); }
@@ -94,7 +94,7 @@ static void save() {
   auto *pix = reinterpret_cast<stbi::pixel *>(g_pixies);
   stbi::write_rgba_unsafe("atlas.png", image_w, image_h, pix);
   silog::log(silog::info, "Atlas saved");
-  v::frame = refresh_batch;
+  v::frame(refresh_batch);
 }
 
 static void init() {
@@ -105,22 +105,22 @@ static void init() {
 extern "C" void casein_init() {
   using namespace casein;
 
-  v::on(KEY_DOWN, K_DOWN, down);
-  v::on(KEY_DOWN, K_UP, up);
-  v::on(KEY_DOWN, K_LEFT, left);
-  v::on(KEY_DOWN, K_RIGHT, right);
-  v::on(KEY_DOWN, K_ENTER, save);
-  v::on(KEY_DOWN, K_1, colour_1);
-  v::on(KEY_DOWN, K_2, colour_2);
-  v::on(KEY_DOWN, K_3, colour_3);
-  v::on(KEY_DOWN, K_4, colour_4);
-  v::on(KEY_DOWN, K_5, colour_5);
+  v::on<KEY_DOWN, K_DOWN, down>();
+  v::on<KEY_DOWN, K_UP, up>();
+  v::on<KEY_DOWN, K_LEFT, left>();
+  v::on<KEY_DOWN, K_RIGHT, right>();
+  v::on<KEY_DOWN, K_ENTER, save>();
+  v::on<KEY_DOWN, K_1, colour_1>();
+  v::on<KEY_DOWN, K_2, colour_2>();
+  v::on<KEY_DOWN, K_3, colour_3>();
+  v::on<KEY_DOWN, K_4, colour_4>();
+  v::on<KEY_DOWN, K_5, colour_5>();
 
   v::pc = v::upc {
     .client_area { 0, 0, image_w, image_h },
     .hover = -1,
   };
-  v::frame = init;
+  v::frame(init);
   v::setup();
 
   auto img = stbi::load(jojo::slurp("atlas.png"));

@@ -32,7 +32,7 @@ static void redraw() {
 
   auto m = v::map();
   grid().load(m);
-  v::frame = none;
+  v::frame(none);
 }
 
 static void click() {
@@ -51,28 +51,28 @@ static void click() {
     }
   }
 
-  v::frame = redraw;
+  v::frame(redraw);
 }
 
 static void flag() {
   auto [x, y] = upc().hover;
   grid().flag(x, y);
-  v::frame = redraw;
+  v::frame(redraw);
 }
 
 static void reset_level() {
   grid().reset();
-  v::frame = redraw;
+  v::frame(redraw);
 
   using namespace casein;
-  v::on(MOUSE_MOVE, redraw);
-  v::on(MOUSE_DOWN, M_LEFT, click);
-  v::on(MOUSE_DOWN, M_RIGHT, flag);
-  v::on(GESTURE, G_TAP_1, click);
+  v::on<MOUSE_MOVE, redraw>();
+  v::on<MOUSE_DOWN, M_LEFT, click>();
+  v::on<MOUSE_DOWN, M_RIGHT, flag>();
+  v::on<GESTURE, G_TAP_1, click>();
   // TODO: re-add long-press touch for flag
 
-  v::on(KEY_DOWN, K_1, [] { g_diff = 0; v::frame = redraw; });
-  v::on(KEY_DOWN, K_2, [] { g_diff = 1; v::frame = redraw; });
+  v::on<KEY_DOWN, K_1, [] { g_diff = 0; v::frame(redraw); }>();
+  v::on<KEY_DOWN, K_2, [] { g_diff = 1; v::frame(redraw); }>();
 
   // TODO: save/load
   // TODO: click difficulty to switch
@@ -82,8 +82,8 @@ extern "C" void casein_init() {
   using namespace casein;
   window_title = "Minesweep";
 
-  v::on(KEY_DOWN, K_SPACE, reset_level);
+  v::on<KEY_DOWN, K_SPACE, reset_level>();
 
-  v::frame = reset_level;
+  v::push<reset_level>();
   v::setup();
 }
