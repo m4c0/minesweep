@@ -14,9 +14,7 @@ void v::sized_stuff::render() {
     u_hover = get_uniform_location(p, "pc.hover");
   }
 
-  auto ca = pc.client_area;
-  ca.w *= -1;
-  uniform4fv(u_client_area, ca);
+  uniform4fv(u_client_area, pc.client_area);
   uniform2fv(u_hover, pc.hover);
 
   vv::ss()->clear({ 0, 0, 0, 1 });
