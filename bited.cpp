@@ -36,17 +36,23 @@ static void refresh_atlas() {
 }
 
 static void refresh_batch() {
-  static constexpr dotz::vec4 nrm { 0 };
   static constexpr dotz::vec4 hgl { 1, 0, 0, 1 };
 
   auto m = v::vv::as()->ppl.map();
-  for (auto y = 0U; y < rows; y++) {
-    for (auto x = 0U; x < cols; x++) {
-      bool hl = y == g_cursor_y && x == g_cursor_x;
+  for (auto y = 0U; y < image_h; y++) {
+    for (auto x = 0U; x < image_w; x++) {
+      bool hl = g_cursor_hl && y == g_cursor_y && x == g_cursor_x;
+      auto pix = g_pixies[y][x];
+      dotz::vec4 nrm {
+        (pix >>  0) & 0xFF,
+        (pix >>  8) & 0xFF,
+        (pix >> 16) & 0xFF,
+        (pix >> 24) & 0xFF,
+      };
       m += {
         .pos { x, y },
-        .colour = hl ? hgl : nrm,
-        .uv = y * rows + x,
+        .colour = hl ? hgl : (nrm / 255.f),
+        .uv = 0xff,
       };
     }
   }
