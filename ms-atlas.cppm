@@ -24,7 +24,11 @@ namespace ms {
     s_7,
     s_8,
     s_label_4,
-    s_label_8 = s_label_4 + 8,
+    s_easy = 24,
+    s_label_8 = s_label_4 + 10,
+    s_medium = 32,
+    s_hard = 40,
+    s_crazy = 48,
   };
 
   constexpr unsigned uv(const cell &c) {
