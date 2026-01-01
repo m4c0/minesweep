@@ -158,7 +158,7 @@ public:
       }
       for (auto i = 0; i < n; i++) {
         m->push({
-          .pos { 4 + (n - i) * 0.8f, label_y },
+          .pos { 3.2f + (n - i) * 0.8f, label_y },
           .uv = uv_label(bombs % 10),
         });
         bombs /= 10;
