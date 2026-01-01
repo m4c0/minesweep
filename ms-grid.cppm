@@ -136,15 +136,16 @@ public:
     }
     if (bombs < 0) bombs = 0;
 
+    constexpr const auto label_y = -1.5f;
     for (unsigned i = 0; i < 4; i++) {
       m->push({
-        .pos { i, -2 },
+        .pos { i, label_y },
         .uv = s_label + i,
       });
     }
     if (bombs == 0) {
       m->push({
-        .pos { 4, -2 },
+        .pos { 4, label_y },
         .uv = s_label_0,
       });
     } else {
@@ -156,7 +157,7 @@ public:
       }
       for (auto i = 0; i < n; i++) {
         m->push({
-          .pos { 4 + (n - i) * 0.8f, -2.f },
+          .pos { 4 + (n - i) * 0.8f, label_y },
           .uv = uv_label(bombs % 10),
         });
         bombs /= 10;
@@ -165,7 +166,7 @@ public:
 
     for (auto i = 0U; i < 4; i++) {
       m->push({
-        .pos { grid_size() + i - 4, -2 },
+        .pos { grid_size() + i - 4, label_y },
         .uv = m_p.difficulty + i,
       });
     }

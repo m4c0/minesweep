@@ -8,12 +8,11 @@ namespace ms {
   auto scr = casein::window_size;
   auto mouse = casein::mouse_pos / scr;
 
-  const auto m = grid_size * 0.1;
   auto asp = scr.x / scr.y;
   auto aw = asp > 1 ? asp : 1;
   auto ah = asp > 1 ? 1 : asp;
 
-  auto area_sz = dotz::vec2 { grid_size } + m * 2;
+  auto area_sz = dotz::vec2 { grid_size } + 4;
   area_sz.x *= aw;
   area_sz.y /= ah;
 
