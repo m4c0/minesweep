@@ -184,6 +184,11 @@ public:
 
     if (f.read<unsigned>() != 'M4MS') throw "invalid file type";
     if (f.read<unsigned>() != 1) throw "invalid file version";
+
+    f.read(&m_p);
+    for (auto & c : m_cells) f.read(&c);
+
+    if (f.read<unsigned>() != 'M4ME') throw "invalid end-of-file marker";
   } catch (file::error) {
     silog::errorf("could not read data from save id=%d", id);
     reset();
