@@ -49,6 +49,25 @@ namespace file {
       return val;
     }
   };
+
+  export class writer {
+#ifndef LECO_TARGET_WASM
+    using ptr_t = hay<FILE *, fopen, fclose>;
+    ptr_t m_f;
+#endif
+
+  public:
+    explicit writer(unsigned id);
+
+    explicit operator bool() const;
+
+    void write(const void * data, unsigned size);
+
+    template<serializable T>
+    void write(T val) {
+      write(&val, sizeof(T));
+    }
+  };
 }
 
 module : private;
@@ -59,22 +78,35 @@ namespace file {
   reader::operator bool() const { return false; }
   // note: client code should never "read" invalid files
   void reader::read(void * data, unsigned size) { throw error {}; }
+
+  writer::writer(unsigned id) {}
+  writer::operator bool() const { return false; }
+  // note: client code should never "write" invalid files
+  void writer::read(const void * data, unsigned size) { throw error {}; }
 #else
   static_assert(sizeof(unsigned) == 4);
   static_assert(__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__);
 
-  static constexpr auto open(unsigned id) {
+  static constexpr auto open(unsigned id, const char * mode) {
     auto file = jute::fmt<"save-%d.dat">(id);
     auto path = buoy::path("m4c0-ms", *file);
-    return hay<FILE *, fopen, fclose>(path.begin(), "rb");
+    return hay<FILE *, fopen, fclose>(path.begin(), mode);
   }
 
-  reader::reader(unsigned id) : m_f { open(id) } {}
+  reader::reader(unsigned id) : m_f { open(id, "rb") } {}
   reader::operator bool() const { return m_f.data(); }
 
   void reader::read(void * data, unsigned size) {
     if (size == 0) return;
     if (fread(data, size, 1, m_f) != 1) throw error {};
+  }
+
+  writer::writer(unsigned id) : m_f { open(id, "wb") } {}
+  writer::operator bool() const { return m_f.data(); }
+
+  void writer::write(const void * data, unsigned size) {
+    if (size == 0) return;
+    if (fwrite(data, size, 1, m_f) != 1) throw error {};
   }
 #endif
 }

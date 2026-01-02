@@ -196,5 +196,25 @@ public:
     silog::errorf("error loading save id=%d: %s", id, msg);
     reset();
   }
+
+  void save(unsigned id) try {
+    file::writer f { id };
+    if (!f) return;
+
+    f.write<unsigned>('M4MS');
+    f.write<unsigned>(1);
+
+    f.write(m_p);
+    for (auto & c : m_cells) f.write(c);
+
+    f.write<unsigned>('M4ME');
+    silog::infof("stored save file with id=%d", id);
+  } catch (file::error) {
+    silog::errorf("could not read data from save id=%d", id);
+    reset();
+  } catch (const char * msg) {
+    silog::errorf("error loading save id=%d: %s", id, msg);
+    reset();
+  }
 };
 } // namespace ms

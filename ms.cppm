@@ -53,6 +53,7 @@ static void click() {
     }
   }
 
+  grid().save(g_diff);
   v::frame(redraw);
 }
 
@@ -74,7 +75,6 @@ static void setup() {
   v::on<KEY_DOWN, K_1, [] { g_diff = 0; v::frame(redraw); }>();
   v::on<KEY_DOWN, K_2, [] { g_diff = 1; v::frame(redraw); }>();
 
-  // TODO: save/load
   // TODO: click difficulty to switch
   // TODO: add dig/flag modes and UI
   // TODO: detect winning condition
