@@ -3,18 +3,21 @@ export module ms;
 import :grid;
 import :upc;
 import casein;
+import file;
 import v;
 
-static constexpr const auto levels = 2;
+static constexpr const auto levels = 3;
 
 static constexpr const ms::game_parameters parameters[levels] {
-  { .difficulty = ms::s_easy,  .grid_size = 10, .max_bombs = 8 },
-  { .difficulty = ms::s_crazy, .grid_size = 36, .max_bombs = 36 * 4 },
+  { .difficulty = ms::s_easy,   .grid_size = 10, .max_bombs = 8 },
+  { .difficulty = ms::s_medium, .grid_size = 16, .max_bombs = 30 },
+  { .difficulty = ms::s_crazy,  .grid_size = 36, .max_bombs = 36 * 4 },
 };
 
 static ms::grid g_grid[levels] {
   { parameters[0] },
   { parameters[1] },
+  { parameters[2] },
 };
 
 static unsigned g_diff = 0;
@@ -37,6 +40,11 @@ static void redraw() {
   v::frame(none);
 }
 
+static void save() {
+  file::writer f { 99 };
+  if (f) f.write<unsigned>(g_diff);
+}
+
 static void click() {
   auto [x, y] = upc().hover;
   switch (grid().click(x, y)) {
@@ -53,13 +61,22 @@ static void click() {
     }
   }
 
+  save();
   grid().save(g_diff);
+
   v::frame(redraw);
 }
 
 static void flag() {
   auto [x, y] = upc().hover;
   grid().flag(x, y);
+  v::frame(redraw);
+}
+
+template<unsigned N>
+static void diff() {
+  g_diff = N;
+  save();
   v::frame(redraw);
 }
 
@@ -72,8 +89,9 @@ static void setup() {
   v::on<MOUSE_DOWN, M_RIGHT, flag>();
   v::on<GESTURE, G_TAP_1, click>();
 
-  v::on<KEY_DOWN, K_1, [] { g_diff = 0; v::frame(redraw); }>();
-  v::on<KEY_DOWN, K_2, [] { g_diff = 1; v::frame(redraw); }>();
+  v::on<KEY_DOWN, K_1, diff<0>>();
+  v::on<KEY_DOWN, K_2, diff<1>>();
+  v::on<KEY_DOWN, K_3, diff<2>>();
 
   // TODO: click difficulty to switch
   // TODO: add dig/flag modes and UI
@@ -85,6 +103,11 @@ static void reset_level() {
   setup();
 }
 static void load() {
+  {
+    file::reader f { 99 };
+    if (f) g_diff = f.read<unsigned>();
+  }
+
   for (auto i = 0; i < levels; i++) g_grid[i].load(i);
   setup();
 }
