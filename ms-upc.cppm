@@ -12,7 +12,7 @@ namespace ms {
   auto aw = asp > 1 ? asp : 1;
   auto ah = asp > 1 ? 1 : asp;
 
-  auto area_sz = dotz::vec2 { grid_size } + 4;
+  auto area_sz = dotz::vec2 { grid_size } + 8;
   area_sz.x *= aw;
   area_sz.y /= ah;
 
