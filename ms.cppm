@@ -62,8 +62,7 @@ static void flag() {
   v::frame(redraw);
 }
 
-static void reset_level() {
-  grid().reset();
+static void setup() {
   v::frame(redraw);
 
   using namespace casein;
@@ -81,6 +80,14 @@ static void reset_level() {
   // TODO: detect winning condition
   // TODO: winning animation
 }
+static void reset_level() {
+  grid().reset();
+  setup();
+}
+static void load() {
+  grid().reset();
+  setup();
+}
 
 extern "C" void casein_init() {
   using namespace casein;
@@ -88,6 +95,6 @@ extern "C" void casein_init() {
 
   v::on<KEY_DOWN, K_SPACE, reset_level>();
 
-  v::push<reset_level>();
+  v::push<load>();
   v::setup();
 }
