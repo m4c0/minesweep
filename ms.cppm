@@ -5,12 +5,14 @@ import :upc;
 import casein;
 import v;
 
-static constexpr const ms::game_parameters parameters[] {
+static constexpr const auto levels = 2;
+
+static constexpr const ms::game_parameters parameters[levels] {
   { .difficulty = ms::s_easy,  .grid_size = 10, .max_bombs = 8 },
   { .difficulty = ms::s_crazy, .grid_size = 36, .max_bombs = 36 * 4 },
 };
 
-static ms::grid g_grid[] {
+static ms::grid g_grid[levels] {
   { parameters[0] },
   { parameters[1] },
 };
