@@ -33,7 +33,7 @@ static void redraw() {
   v::pc = pc;
 
   auto m = v::map();
-  grid().load(m);
+  grid().draw(m);
   v::frame(none);
 }
 
@@ -85,7 +85,7 @@ static void reset_level() {
   setup();
 }
 static void load() {
-  grid().reset();
+  for (auto i = 0; i < levels; i++) g_grid[i].load(i);
   setup();
 }
 

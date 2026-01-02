@@ -1,6 +1,7 @@
 export module ms:grid;
 import :atlas;
 import dotz;
+import file;
 import hai;
 import rng;
 
@@ -123,7 +124,7 @@ public:
     }
   }
 
-  void load(auto & m) const {
+  void draw(auto & m) const {
     int bombs = 0;
     for (auto i = 0; i < m_cells.size(); i++) {
       const auto &cell = m_cells[i];
@@ -174,6 +175,11 @@ public:
         .uv = m_p.difficulty + i,
       });
     }
+  }
+
+  void load(unsigned id) {
+    file::t f { id };
+    if (!f) return;
   }
 };
 } // namespace ms
