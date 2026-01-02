@@ -69,13 +69,15 @@ static void reset_level() {
   v::on<MOUSE_DOWN, M_LEFT, click>();
   v::on<MOUSE_DOWN, M_RIGHT, flag>();
   v::on<GESTURE, G_TAP_1, click>();
-  // TODO: re-add long-press touch for flag
 
   v::on<KEY_DOWN, K_1, [] { g_diff = 0; v::frame(redraw); }>();
   v::on<KEY_DOWN, K_2, [] { g_diff = 1; v::frame(redraw); }>();
 
   // TODO: save/load
   // TODO: click difficulty to switch
+  // TODO: add dig/flag modes and UI
+  // TODO: detect winning condition
+  // TODO: winning animation
 }
 
 extern "C" void casein_init() {
