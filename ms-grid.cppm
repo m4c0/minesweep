@@ -4,6 +4,7 @@ import dotz;
 import file;
 import hai;
 import rng;
+import silog;
 
 export namespace ms {
   struct game_parameters {
@@ -177,9 +178,18 @@ public:
     }
   }
 
-  void load(unsigned id) {
-    file::t f { id };
+  void load(unsigned id) try {
+    file::reader f { id };
     if (!f) return;
+
+    if (f.read<unsigned>() != 'M4MS') throw "invalid file type";
+    if (f.read<unsigned>() != 1) throw "invalid file version";
+  } catch (file::error) {
+    silog::errorf("could not read data from save id=%d", id);
+    reset();
+  } catch (const char * msg) {
+    silog::errorf("error loading save id=%d: %s", id, msg);
+    reset();
   }
 };
 } // namespace ms
