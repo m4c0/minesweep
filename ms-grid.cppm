@@ -21,6 +21,7 @@ class grid {
   game_parameters m_p;
   hai::array<cell> m_cells;
   sitime::stopwatch m_winning;
+  bool m_lost;
 
   void setup_bombs(unsigned max_bombs) {
     const auto cells = m_cells.size();
@@ -125,11 +126,13 @@ public:
     setup_bombs(m_p.max_bombs);
     update_numbers();
     m_winning = { 0 };
+    m_lost = false;
   }
 
   constexpr unsigned grid_size() const { return m_p.grid_size; }
 
   bool can_hover(int x, int y) {
+    if (m_lost) return false;
     if (x < 0 || y < 0 || x >= grid_size() || y >= m_p.grid_size) return false;
     return !at(x, y).visible;
   }
@@ -138,17 +141,26 @@ public:
   click_outcome click(int x, int y) {
     using enum click_outcome;
 
+    if (m_lost) return bomb;
+
     if (x >= 0 && y >= 0 && x < grid_size() && y < m_p.grid_size) {
       if (at(x, y).flagged) return none;
 
       this->fill(x, y);
-      return at(x, y).bomb ? bomb : fill;
+
+      if (at(x, y).bomb) {
+        m_lost = true;
+        return bomb;
+      }
+
+      return fill;
     }
 
     return none;
   }
 
   void flag(int x, int y) {
+    if (m_lost) return;
     if (x >= 0 && y >= 0 && x < grid_size() && y < m_p.grid_size) {
       auto &g = at(x, y);
       g.flagged = !g.flagged;
@@ -230,6 +242,7 @@ public:
 
     for (auto & c : m_cells) f.read(&c);
     m_winning = sitime::stopwatch { f.read<uint64_t>() };
+    m_lost = f.read<bool>();
 
     if (f.read<unsigned>() != 'M4ME') throw "invalid end-of-file marker";
   } catch (file::error) {
@@ -249,6 +262,7 @@ public:
 
     for (auto & c : m_cells) f.write(c);
     f.write<uint64_t>(m_winning.start_timestamp());
+    f.write<bool>(m_lost);
 
     f.write<unsigned>('M4ME');
     silog::infof("stored save file with id=%d", id);

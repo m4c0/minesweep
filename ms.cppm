@@ -34,14 +34,12 @@ static auto upc() {
 static void none() {}
 
 static void game_over() {
-  v::frame([] {
-    auto pc = upc();
-    pc.hover = -1;
-    v::pc = pc;
+  auto pc = upc();
+  pc.hover = -1;
+  v::pc = pc;
 
-    auto m = v::map();
-    grid().draw(m);
-  });
+  auto m = v::map();
+  grid().draw(m);
 }
 
 static void redraw() {
@@ -53,7 +51,7 @@ static void redraw() {
   switch (grid().draw(m)) {
     using enum ms::grid::draw_outcome;
     case none: v::frame(::none); break;
-    case won: game_over(); break;
+    case won: v::frame(game_over); break;
   }
 }
 
@@ -75,7 +73,7 @@ static void click() {
     using enum ms::grid::click_outcome;
     case none: 
     case fill: break;
-    case bomb: game_over(); break;
+    case bomb: v::frame(game_over); break;
   }
 
   save();
