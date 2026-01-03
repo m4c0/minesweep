@@ -10,6 +10,7 @@ import v;
 // TODO: we can "flag" empty tiles
 // TODO: save which diff was last opened
 // TODO: right-click on WASM (or even iOS)
+// TODO: level change works past-right and past-top
 
 static constexpr const auto levels = 4;
 
@@ -131,11 +132,18 @@ static void load() {
   setup();
 }
 
+static void toggle_fullscreen() {
+  using namespace casein;
+  fullscreen = !fullscreen;
+  interrupt(IRQ_FULLSCREEN);
+}
+
 extern "C" void casein_init() {
   using namespace casein;
   window_title = "Minesweep";
 
   v::on<KEY_DOWN, K_SPACE, reset_level>();
+  v::on<KEY_DOWN, K_F, toggle_fullscreen>();
 
   v::push<load>();
   v::setup();
