@@ -6,18 +6,20 @@ import casein;
 import file;
 import v;
 
-static constexpr const auto levels = 3;
+static constexpr const auto levels = 4;
 
 static constexpr const ms::game_parameters parameters[levels] {
-  { .difficulty = ms::s_easy,   .grid_size = 10, .max_bombs = 8 },
-  { .difficulty = ms::s_medium, .grid_size = 16, .max_bombs = 30 },
-  { .difficulty = ms::s_crazy,  .grid_size = 36, .max_bombs = 36 * 4 },
+  { .difficulty = ms::s_easy,   .label_w = 3.0f, .grid_size = 10, .max_bombs =   8 },
+  { .difficulty = ms::s_medium, .label_w = 4.5f, .grid_size = 16, .max_bombs =  30 },
+  { .difficulty = ms::s_hard,   .label_w = 3.0f, .grid_size = 24, .max_bombs =  64 },
+  { .difficulty = ms::s_crazy,  .label_w = 4.0f, .grid_size = 36, .max_bombs = 144 },
 };
 
 static ms::grid g_grid[levels] {
   { parameters[0] },
   { parameters[1] },
   { parameters[2] },
+  { parameters[3] },
 };
 
 static unsigned g_diff = 0;
@@ -92,6 +94,7 @@ static void setup() {
   v::on<KEY_DOWN, K_1, diff<0>>();
   v::on<KEY_DOWN, K_2, diff<1>>();
   v::on<KEY_DOWN, K_3, diff<2>>();
+  v::on<KEY_DOWN, K_4, diff<3>>();
 
   // TODO: click difficulty to switch
   // TODO: add dig/flag modes and UI

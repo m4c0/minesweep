@@ -9,6 +9,7 @@ import silog;
 export namespace ms {
   struct game_parameters {
     unsigned difficulty;
+    float label_w;
     unsigned grid_size;
     unsigned max_bombs;
   };
@@ -170,9 +171,9 @@ public:
       }
     }
 
-    for (auto i = 0U; i < 4; i++) {
+    for (auto i = 0U; i < 5; i++) {
       m->push({
-        .pos { grid_size() + i - 4, label_y },
+        .pos { grid_size() + i - m_p.label_w, label_y },
         .uv = m_p.difficulty + i,
       });
     }
@@ -185,7 +186,6 @@ public:
     if (f.read<unsigned>() != 'M4MS') throw "invalid file type";
     if (f.read<unsigned>() != 1) throw "invalid file version";
 
-    f.read(&m_p);
     for (auto & c : m_cells) f.read(&c);
 
     if (f.read<unsigned>() != 'M4ME') throw "invalid end-of-file marker";
@@ -204,7 +204,6 @@ public:
     f.write<unsigned>('M4MS');
     f.write<unsigned>(1);
 
-    f.write(m_p);
     for (auto & c : m_cells) f.write(c);
 
     f.write<unsigned>('M4ME');
