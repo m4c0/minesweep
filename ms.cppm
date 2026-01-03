@@ -49,6 +49,13 @@ static void save() {
 
 static void click() {
   auto [x, y] = upc().hover;
+  if (y < 0 && x > grid().grid_size() - 5) {
+    g_diff = (g_diff + 1) % levels;
+    save();
+    v::frame(redraw);
+    return;
+  }
+
   switch (grid().click(x, y)) {
     using enum ms::grid::click_outcome;
     case none: 
@@ -96,7 +103,6 @@ static void setup() {
   v::on<KEY_DOWN, K_3, diff<2>>();
   v::on<KEY_DOWN, K_4, diff<3>>();
 
-  // TODO: click difficulty to switch
   // TODO: add dig/flag modes and UI
   // TODO: detect winning condition
   // TODO: winning animation
