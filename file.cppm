@@ -20,10 +20,14 @@ namespace file {
   template<typename T>
   concept serializable = not_a_pointer<T> && __is_standard_layout(T);
 
+#ifndef LECO_TARGET_WASM
+  void close(FILE *);
+  using ptr_t = hay<FILE *, fopen, close>;
+#endif
+
   export class error {};
   export class reader {
 #ifndef LECO_TARGET_WASM
-    using ptr_t = hay<FILE *, fopen, fclose>;
     ptr_t m_f;
 #endif
 
@@ -52,7 +56,6 @@ namespace file {
 
   export class writer {
 #ifndef LECO_TARGET_WASM
-    using ptr_t = hay<FILE *, fopen, fclose>;
     ptr_t m_f;
 #endif
 
@@ -87,10 +90,14 @@ namespace file {
   static_assert(sizeof(unsigned) == 4);
   static_assert(__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__);
 
-  static constexpr auto open(unsigned id, const char * mode) {
+  void close(FILE * f) {
+    if (f) fclose(f); // Windows crashes if file is not open
+  }
+
+  static constexpr ptr_t open(unsigned id, const char * mode) {
     auto file = jute::fmt<"save-%d.dat">(id);
     auto path = buoy::path("m4c0-ms", *file);
-    return hay<FILE *, fopen, fclose>(path.begin(), mode);
+    return ptr_t { path.begin(), mode };
   }
 
   reader::reader(unsigned id) : m_f { open(id, "rb") } {}
