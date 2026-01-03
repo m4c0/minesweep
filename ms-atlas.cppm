@@ -29,6 +29,9 @@ namespace ms {
     s_medium = 32,
     s_hard = 40,
     s_crazy = 48,
+    s_flag = 52,
+    s_reset = 56,
+    s_dig = 60,
   };
 
   constexpr unsigned uv(const cell &c) {

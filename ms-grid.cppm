@@ -225,6 +225,16 @@ public:
         .uv = m_p.difficulty + i,
       });
     }
+    for (auto i = 0U; i < 4; i++) {
+      m->push({
+        .pos { i, grid_size() + 0.5f },
+        .uv = s_reset + i,
+      });
+      m->push({
+        .pos { grid_size() + i - 3, grid_size() + 0.5f },
+        .uv = s_dig + i,
+      });
+    }
 
     if (visible + flagged == m_cells.size() && bombs == flagged) {
       m_winning = {};
