@@ -7,8 +7,8 @@ import file;
 import v;
 
 // To be fixed before publishing
-// TODO: save which diff was last opened
-// TODO: right-click on WASM (or even iOS)
+// TODO: add dig/flag modes and UI
+// TODO: save which diff was last opened (can't replicate)
 
 static constexpr const auto levels = 4;
 
@@ -106,16 +106,17 @@ static void setup() {
   using namespace casein;
   v::on<MOUSE_MOVE, redraw>();
   v::on<MOUSE_DOWN, M_LEFT, click>();
-  v::on<MOUSE_DOWN, M_RIGHT, flag>();
   v::on<GESTURE, G_TAP_1, click>();
+
+#ifndef LECO_TARGET_WASM
+  // Right-click is always funky on web
+  v::on<MOUSE_DOWN, M_RIGHT, flag>();
+#endif
 
   v::on<KEY_DOWN, K_1, diff<0>>();
   v::on<KEY_DOWN, K_2, diff<1>>();
   v::on<KEY_DOWN, K_3, diff<2>>();
   v::on<KEY_DOWN, K_4, diff<3>>();
-
-  // TODO: add dig/flag modes and UI
-  // TODO: winning animation
 }
 static void reset_level() {
   grid().reset();
