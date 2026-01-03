@@ -38,6 +38,13 @@ static void won() {
   reset(MOUSE_MOVE);
   reset_m(MOUSE_DOWN);
   reset_g(GESTURE);
+
+  auto pc = upc();
+  pc.hover = -1;
+  v::pc = pc;
+
+  auto m = v::map();
+  grid().won(m);
 }
 
 static void redraw() {

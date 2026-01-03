@@ -128,6 +128,20 @@ public:
     }
   }
 
+  void won(auto & m) const {
+    for (auto i = 0; i < m_cells.size(); i++) {
+      const auto &cell = m_cells[i];
+      const float x = i % grid_size();
+      const float y = i / grid_size();
+
+      m->push({
+        .pos { x, y },
+        .colour = colour_of(cell),
+        .uv = uv(cell),
+      });
+    }
+  }
+
   enum class draw_outcome { none, won }; 
   draw_outcome draw(auto & m) const {
     int visible = 0;
