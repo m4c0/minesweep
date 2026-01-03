@@ -112,6 +112,8 @@ public:
     using enum click_outcome;
 
     if (x >= 0 && y >= 0 && x < grid_size() && y < m_p.grid_size) {
+      if (at(x, y).flagged) return none;
+
       this->fill(x, y);
       return at(x, y).bomb ? bomb : fill;
     }
