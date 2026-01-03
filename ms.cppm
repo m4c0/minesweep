@@ -7,7 +7,6 @@ import file;
 import v;
 
 // To be fixed before publishing
-// TODO: add dig/flag modes and UI
 // TODO: save which diff was last opened (can't replicate)
 
 static constexpr const auto levels = 4;
@@ -70,6 +69,17 @@ static void click() {
   if (y < 0 && lx > 0 && lx < 5) {
     g_diff = (g_diff + 1) % levels;
     save();
+    v::frame(redraw);
+    return;
+  }
+  float ly = y - grid().grid_size();
+  if (ly >= 0 && ly <= 1.5) {
+    if (x > 0 && x < 4) {
+      grid().reset();
+      grid().save(g_diff);
+    } else if (lx > 0 && lx < 5) {
+      ms::g_flag = !ms::g_flag;
+    }
     v::frame(redraw);
     return;
   }

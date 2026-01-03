@@ -10,6 +10,8 @@ import sitime;
 using namespace traits::ints;
 
 export namespace ms {
+  bool g_flag = false;
+
   struct game_parameters {
     unsigned difficulty;
     float label_w;
@@ -144,6 +146,12 @@ public:
     if (m_lost) return bomb;
 
     if (x >= 0 && y >= 0 && x < grid_size() && y < m_p.grid_size) {
+      if (g_flag) {
+        auto &g = at(x, y);
+        if (!g.visible) g.flagged = !g.flagged;
+        return none;
+      }
+
       if (at(x, y).flagged) return none;
 
       this->fill(x, y);
@@ -232,7 +240,7 @@ public:
       });
       m->push({
         .pos { grid_size() + i - 3, grid_size() + 0.5f },
-        .uv = s_dig + i,
+        .uv = (g_flag ? s_flag : s_dig) + i,
       });
     }
 
