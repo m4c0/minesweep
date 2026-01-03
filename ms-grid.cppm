@@ -163,7 +163,7 @@ public:
     if (m_lost) return;
     if (x >= 0 && y >= 0 && x < grid_size() && y < m_p.grid_size) {
       auto &g = at(x, y);
-      g.flagged = !g.flagged;
+      if (!g.visible) g.flagged = !g.flagged;
     }
   }
 
