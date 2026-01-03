@@ -167,6 +167,7 @@ public:
     }
   }
 
+  // TODO: remove "outcome" and move logic to "click"
   enum class draw_outcome { none, won }; 
   draw_outcome draw(auto & m) {
     if (m_winning.start_timestamp()) return (won(m), draw_outcome::won);
