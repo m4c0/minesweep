@@ -85,7 +85,7 @@ namespace file {
   writer::writer(unsigned id) {}
   writer::operator bool() const { return false; }
   // note: client code should never "write" invalid files
-  void writer::read(const void * data, unsigned size) { throw error {}; }
+  void writer::write(const void * data, unsigned size) { throw error {}; }
 #else
   static_assert(sizeof(unsigned) == 4);
   static_assert(__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__);
