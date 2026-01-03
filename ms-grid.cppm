@@ -129,10 +129,16 @@ public:
   }
 
   void won(auto & m, float secs) const {
+    static constexpr const auto grav = 18;
+    static constexpr const auto v_0 = -20;
+
     for (auto i = 0; i < m_cells.size(); i++) {
       const auto &cell = m_cells[i];
-      const float x = i % grid_size();
-      const float y = i / grid_size();
+      float x = i % grid_size();
+      float y = i / grid_size();
+
+      x += secs * (x - grid_size()/2.f);
+      y += v_0 * (grid_size() - y)/grid_size() * secs + grav * secs * secs;
 
       m->push({
         .pos { x, y },
