@@ -4,7 +4,6 @@ import :grid;
 import :upc;
 import casein;
 import file;
-import sitime;
 import v;
 
 static constexpr const auto levels = 4;

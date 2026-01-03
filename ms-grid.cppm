@@ -5,6 +5,9 @@ import file;
 import hai;
 import rng;
 import silog;
+import sitime;
+
+using namespace traits::ints;
 
 export namespace ms {
   struct game_parameters {
@@ -17,6 +20,7 @@ export namespace ms {
 class grid {
   game_parameters m_p;
   hai::array<cell> m_cells;
+  sitime::stopwatch m_winning;
 
   void setup_bombs(unsigned max_bombs) {
     const auto cells = m_cells.size();
@@ -87,6 +91,28 @@ class grid {
     return m_cells[y * grid_size() + x];
   }
 
+  void won(auto & m) const {
+    static constexpr const auto grav = 18;
+    static constexpr const auto v_0 = -20;
+
+    auto secs = m_winning.secs();
+
+    for (auto i = 0; i < m_cells.size(); i++) {
+      const auto &cell = m_cells[i];
+      float x = i % grid_size();
+      float y = i / grid_size();
+
+      x += secs * (x - grid_size()/2.f);
+      y += v_0 * (grid_size() - y)/grid_size() * secs + grav * secs * secs;
+
+      m->push({
+        .pos { x, y },
+        .colour = colour_of(cell),
+        .uv = uv(cell),
+      });
+    }
+  }
+
 public:
   grid(game_parameters p) :
     m_p { p }
@@ -98,6 +124,7 @@ public:
     for (auto & c : m_cells) c = {};
     setup_bombs(m_p.max_bombs);
     update_numbers();
+    m_winning = { 0 };
   }
 
   constexpr unsigned grid_size() const { return m_p.grid_size; }
@@ -128,28 +155,10 @@ public:
     }
   }
 
-  void won(auto & m, float secs) const {
-    static constexpr const auto grav = 18;
-    static constexpr const auto v_0 = -20;
-
-    for (auto i = 0; i < m_cells.size(); i++) {
-      const auto &cell = m_cells[i];
-      float x = i % grid_size();
-      float y = i / grid_size();
-
-      x += secs * (x - grid_size()/2.f);
-      y += v_0 * (grid_size() - y)/grid_size() * secs + grav * secs * secs;
-
-      m->push({
-        .pos { x, y },
-        .colour = colour_of(cell),
-        .uv = uv(cell),
-      });
-    }
-  }
-
   enum class draw_outcome { none, won }; 
-  draw_outcome draw(auto & m) const {
+  draw_outcome draw(auto & m) {
+    if (m_winning.start_timestamp()) return (won(m), draw_outcome::won);
+
     int visible = 0;
     int flagged = 0;
     int bombs = 0;
@@ -204,9 +213,12 @@ public:
       });
     }
 
-    return visible + flagged == m_cells.size() && bombs == flagged 
-      ? draw_outcome::won
-      : draw_outcome::none;;
+    if (visible + flagged == m_cells.size() && bombs == flagged) {
+      m_winning = {};
+      return draw_outcome::won;
+    }
+
+    return draw_outcome::none;
   }
 
   void load(unsigned id) try {
@@ -217,6 +229,7 @@ public:
     if (f.read<unsigned>() != 1) throw "invalid file version";
 
     for (auto & c : m_cells) f.read(&c);
+    m_winning = sitime::stopwatch { f.read<uint64_t>() };
 
     if (f.read<unsigned>() != 'M4ME') throw "invalid end-of-file marker";
   } catch (file::error) {
@@ -235,6 +248,7 @@ public:
     f.write<unsigned>(1);
 
     for (auto & c : m_cells) f.write(c);
+    f.write<uint64_t>(m_winning.start_timestamp());
 
     f.write<unsigned>('M4ME');
     silog::infof("stored save file with id=%d", id);
