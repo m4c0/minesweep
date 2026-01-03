@@ -128,7 +128,7 @@ public:
     }
   }
 
-  void won(auto & m) const {
+  void won(auto & m, float secs) const {
     for (auto i = 0; i < m_cells.size(); i++) {
       const auto &cell = m_cells[i];
       const float x = i % grid_size();

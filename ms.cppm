@@ -4,6 +4,7 @@ import :grid;
 import :upc;
 import casein;
 import file;
+import sitime;
 import v;
 
 static constexpr const auto levels = 4;
@@ -33,6 +34,7 @@ static auto upc() {
 
 static void none() {}
 
+static sitime::stopwatch g_won_timer {};
 static void won() {
   using namespace casein;
   reset(MOUSE_MOVE);
@@ -43,8 +45,11 @@ static void won() {
   pc.hover = -1;
   v::pc = pc;
 
-  auto m = v::map();
-  grid().won(m);
+  g_won_timer = {};
+  v::frame([] {
+    auto m = v::map();
+    grid().won(m, g_won_timer.secs());
+  });
 }
 
 static void redraw() {
