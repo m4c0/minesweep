@@ -33,21 +33,14 @@ static auto upc() {
 
 static void none() {}
 
-static sitime::stopwatch g_won_timer {};
-static void won() {
-  using namespace casein;
-  reset(MOUSE_MOVE);
-  reset_m(MOUSE_DOWN);
-  reset_g(GESTURE);
-
-  auto pc = upc();
-  pc.hover = -1;
-  v::pc = pc;
-
-  g_won_timer = {};
+static void game_over() {
   v::frame([] {
+    auto pc = upc();
+    pc.hover = -1;
+    v::pc = pc;
+
     auto m = v::map();
-    grid().won(m, g_won_timer.secs());
+    grid().draw(m);
   });
 }
 
@@ -60,7 +53,7 @@ static void redraw() {
   switch (grid().draw(m)) {
     using enum ms::grid::draw_outcome;
     case none: v::frame(::none); break;
-    case won: v::frame(::won); break;
+    case won: game_over(); break;
   }
 }
 
@@ -82,14 +75,7 @@ static void click() {
     using enum ms::grid::click_outcome;
     case none: 
     case fill: break;
-    case bomb: {
-      using namespace casein;
-      reset(MOUSE_MOVE);
-      reset_m(MOUSE_DOWN);
-      reset_g(GESTURE);
-      v::pc.hover = { -1 };
-      break;
-    }
+    case bomb: game_over(); break;
   }
 
   save();
