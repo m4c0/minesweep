@@ -32,14 +32,25 @@ static auto upc() {
 }
 
 static void none() {}
+
+static void won() {
+  using namespace casein;
+  reset(MOUSE_MOVE);
+  reset_m(MOUSE_DOWN);
+  reset_g(GESTURE);
+}
+
 static void redraw() {
   auto pc = upc();
   if (!grid().can_hover(pc.hover.x, pc.hover.y)) pc.hover = -1;
   v::pc = pc;
 
   auto m = v::map();
-  grid().draw(m);
-  v::frame(none);
+  switch (grid().draw(m)) {
+    using enum ms::grid::draw_outcome;
+    case none: v::frame(::none); break;
+    case won: v::frame(::won); break;
+  }
 }
 
 static void save() {
@@ -104,7 +115,6 @@ static void setup() {
   v::on<KEY_DOWN, K_4, diff<3>>();
 
   // TODO: add dig/flag modes and UI
-  // TODO: detect winning condition
   // TODO: winning animation
 }
 static void reset_level() {

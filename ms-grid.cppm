@@ -128,7 +128,10 @@ public:
     }
   }
 
-  void draw(auto & m) const {
+  enum class draw_outcome { none, won }; 
+  draw_outcome draw(auto & m) const {
+    int visible = 0;
+    int flagged = 0;
     int bombs = 0;
     for (auto i = 0; i < m_cells.size(); i++) {
       const auto &cell = m_cells[i];
@@ -141,9 +144,9 @@ public:
         .uv = uv(cell),
       });
       if (cell.bomb) bombs++;
-      if (cell.flagged) bombs--;
+      if (cell.flagged) flagged++;
+      if (cell.visible) visible++;
     }
-    if (bombs < 0) bombs = 0;
 
     constexpr const auto label_y = -1.5f;
     for (unsigned i = 0; i < 4; i++) {
@@ -152,14 +155,15 @@ public:
         .uv = s_label + i,
       });
     }
-    if (bombs == 0) {
+    if (bombs <= flagged) {
       m->push({
         .pos { 4, label_y },
         .uv = s_label_0,
       });
     } else {
       unsigned n = 0;
-      unsigned acc = bombs;
+      unsigned b = bombs - flagged;
+      unsigned acc = b;
       while (acc) {
         acc /= 10;
         n++;
@@ -167,9 +171,9 @@ public:
       for (auto i = 0; i < n; i++) {
         m->push({
           .pos { 3.2f + (n - i) * 0.8f, label_y },
-          .uv = uv_label(bombs % 10),
+          .uv = uv_label(b % 10),
         });
-        bombs /= 10;
+        b /= 10;
       }
     }
 
@@ -179,6 +183,10 @@ public:
         .uv = m_p.difficulty + i,
       });
     }
+
+    return visible + flagged == m_cells.size() && bombs == flagged 
+      ? draw_outcome::won
+      : draw_outcome::none;;
   }
 
   void load(unsigned id) try {
