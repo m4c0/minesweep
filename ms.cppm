@@ -10,7 +10,6 @@ import v;
 // TODO: we can "flag" empty tiles
 // TODO: save which diff was last opened
 // TODO: right-click on WASM (or even iOS)
-// TODO: level change works past-right and past-top
 
 static constexpr const auto levels = 4;
 
@@ -68,7 +67,8 @@ static void save() {
 
 static void click() {
   auto [x, y] = upc().hover;
-  if (y < 0 && x > grid().grid_size() - 5) {
+  float lx = x - (grid().grid_size() - 5);
+  if (y < 0 && lx > 0 && lx < 5) {
     g_diff = (g_diff + 1) % levels;
     save();
     v::frame(redraw);
