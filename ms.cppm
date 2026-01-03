@@ -6,6 +6,11 @@ import casein;
 import file;
 import v;
 
+// To be fixed before publishing
+// TODO: we can "flag" empty tiles
+// TODO: save which diff was last opened
+// TODO: right-click on WASM (or even iOS)
+
 static constexpr const auto levels = 4;
 
 static constexpr const ms::game_parameters parameters[levels] {
