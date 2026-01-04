@@ -86,14 +86,12 @@ static void click() {
 
   switch (grid().click(x, y)) {
     using enum ms::grid::click_outcome;
-    case none: break;
+    case none: v::frame(redraw);    break;
     case bomb: v::frame(game_over); break;
   }
 
   save();
   grid().save(g_diff);
-
-  v::frame(redraw);
 }
 
 static void flag() {
