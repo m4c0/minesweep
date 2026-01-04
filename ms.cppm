@@ -7,7 +7,9 @@ import file;
 import v;
 
 // To be fixed before publishing
-// TODO: click to reset after winning
+// 1. Test more
+// 2. ???
+// 3. Profit!
 
 static constexpr const auto levels = 4;
 

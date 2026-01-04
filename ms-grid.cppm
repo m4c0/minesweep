@@ -150,6 +150,13 @@ public:
 
     if (lost()) return bomb;
 
+    if (won()) {
+      // only accept to "reset after game over" after some time to avoid
+      // double-clicks
+      if (m_winning.secs() > 1.0) reset();
+      return none;
+    }
+
     if (x >= 0 && y >= 0 && x < grid_size() && y < m_p.grid_size) {
       if (g_flag) {
         auto &g = at(x, y);
