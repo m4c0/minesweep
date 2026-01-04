@@ -143,11 +143,13 @@ static void load() {
   setup();
 }
 
+#ifndef LECO_TARGET_WASM
 static void toggle_fullscreen() {
   using namespace casein;
   fullscreen = !fullscreen;
   interrupt(IRQ_FULLSCREEN);
 }
+#endif
 
 extern "C" void casein_init() {
   using namespace casein;
