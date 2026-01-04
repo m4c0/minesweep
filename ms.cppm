@@ -7,7 +7,6 @@ import file;
 import v;
 
 // To be fixed before publishing
-// TODO: use different cursor colour/shape for diff modes
 // TODO: click to reset after winning
 
 static constexpr const auto levels = 4;

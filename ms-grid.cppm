@@ -185,13 +185,16 @@ public:
     int flagged = 0;
     int bombs = 0;
     for (auto i = 0; i < m_cells.size(); i++) {
+      static constexpr const dotz::vec4 hover_nonf_colour { 0.7, 0.4, 0.3, 1.0 };
+      static constexpr const dotz::vec4 hover_flag_colour { 0.3, 0.7, 0.4, 1.0 };
+
       const auto &cell = m_cells[i];
       const auto x = i % grid_size();
       const auto y = i / grid_size();
       dotz::ivec2 p { x, y };
 
       auto c = v::pc.hover.x == p.x && v::pc.hover.y == p.y ?
-        dotz::vec4 { 0.4, 0.5, 0.6, 1.0 } :
+        (g_flag ? hover_flag_colour : hover_nonf_colour) :
         colour_of(cell);
 
       m->push({

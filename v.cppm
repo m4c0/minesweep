@@ -15,6 +15,7 @@ import vinyl;
 namespace v {
   export extern struct upc {
     dotz::vec4 client_area;
+    // TODO: remove "hover" from shader
     dotz::vec2 hover;
   } pc;
   static_assert(sizeof(upc) == 6 * sizeof(float));
