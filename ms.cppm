@@ -152,7 +152,9 @@ extern "C" void casein_init() {
   window_title = "Minesweep";
 
   v::on<KEY_DOWN, K_SPACE, reset_level>();
+#ifndef LECO_TARGET_WASM
   v::on<KEY_DOWN, K_F, toggle_fullscreen>();
+#endif
 
   v::push<load>();
   v::setup();
