@@ -96,11 +96,13 @@ static void click() {
   grid().save(g_diff);
 }
 
+#ifndef LECO_TARGET_WASM
 static void flag() {
   auto [x, y] = upc().hover;
   grid().flag(x, y);
   v::frame(redraw);
 }
+#endif
 
 template<unsigned N>
 static void diff() {
