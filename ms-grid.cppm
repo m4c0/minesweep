@@ -6,6 +6,7 @@ import hai;
 import rng;
 import silog;
 import sitime;
+import v;
 
 using namespace traits::ints;
 
@@ -185,12 +186,17 @@ public:
     int bombs = 0;
     for (auto i = 0; i < m_cells.size(); i++) {
       const auto &cell = m_cells[i];
-      const float x = i % grid_size();
-      const float y = i / grid_size();
+      const auto x = i % grid_size();
+      const auto y = i / grid_size();
+      dotz::ivec2 p { x, y };
+
+      auto c = v::pc.hover.x == p.x && v::pc.hover.y == p.y ?
+        dotz::vec4 { 0.4, 0.5, 0.6, 1.0 } :
+        colour_of(cell);
 
       m->push({
-        .pos { x, y },
-        .colour = colour_of(cell),
+        .pos = p,
+        .colour = c,
         .uv = uv(cell),
       });
       if (cell.bomb) bombs++;

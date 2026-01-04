@@ -7,7 +7,8 @@ import file;
 import v;
 
 // To be fixed before publishing
-// TODO: save which diff was last opened (can't replicate)
+// TODO: use different cursor colour/shape for diff modes
+// TODO: click to reset after winning
 
 static constexpr const auto levels = 4;
 

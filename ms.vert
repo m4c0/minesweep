@@ -20,5 +20,5 @@ void main() {
   p.y *= -1;
   gl_Position = vec4(p, 0, 1);
   frag_uv = ivec2(uv % 8, uv / 8) + v_pos * 0.999 + 0.001;
-  frag_bg = i_pos == pc.hover ? vec4(0.4, 0.5, 0.6, 1.0) : colour;
+  frag_bg = colour;
 }
