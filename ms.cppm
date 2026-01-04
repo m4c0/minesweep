@@ -86,8 +86,7 @@ static void click() {
 
   switch (grid().click(x, y)) {
     using enum ms::grid::click_outcome;
-    case none: 
-    case fill: break;
+    case none: break;
     case bomb: v::frame(game_over); break;
   }
 

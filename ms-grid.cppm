@@ -95,7 +95,7 @@ class grid {
     return m_cells[y * grid_size() + x];
   }
 
-  void won(auto & m) const {
+  void draw_won(auto & m) const {
     static constexpr const auto grav = 18;
     static constexpr const auto v_0 = -20;
 
@@ -134,17 +134,21 @@ public:
 
   constexpr unsigned grid_size() const { return m_p.grid_size; }
 
+  [[nodiscard]] constexpr bool lost() const { return m_lost; }
+  [[nodiscard]] constexpr bool won() const { return m_winning.start_timestamp(); }
+  [[nodiscard]] constexpr bool game_over() const { return lost() || won(); }
+
   bool can_hover(int x, int y) {
-    if (m_lost) return false;
+    if (game_over()) return false;
     if (x < 0 || y < 0 || x >= grid_size() || y >= m_p.grid_size) return false;
     return !at(x, y).visible;
   }
 
-  enum class click_outcome { none, fill, bomb };
+  enum class click_outcome { none, bomb };
   click_outcome click(int x, int y) {
     using enum click_outcome;
 
-    if (m_lost) return bomb;
+    if (lost()) return bomb;
 
     if (x >= 0 && y >= 0 && x < grid_size() && y < m_p.grid_size) {
       if (g_flag) {
@@ -162,14 +166,14 @@ public:
         return bomb;
       }
 
-      return fill;
+      return none;
     }
 
     return none;
   }
 
   void flag(int x, int y) {
-    if (m_lost) return;
+    if (game_over()) return;
     if (x >= 0 && y >= 0 && x < grid_size() && y < m_p.grid_size) {
       auto &g = at(x, y);
       if (!g.visible) g.flagged = !g.flagged;
@@ -179,7 +183,7 @@ public:
   // TODO: remove "outcome" and move logic to "click"
   enum class draw_outcome { none, won }; 
   draw_outcome draw(auto & m) {
-    if (m_winning.start_timestamp()) return (won(m), draw_outcome::won);
+    if (this->won()) return (draw_won(m), draw_outcome::won);
 
     int visible = 0;
     int flagged = 0;
