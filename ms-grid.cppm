@@ -259,7 +259,7 @@ public:
         .uv = s_reset + i,
       });
       m->push({
-        .pos { grid_size() + i - 3, grid_size() + 0.5f },
+        .pos { grid_size() + i - 4, grid_size() + 0.5f },
         .uv = (g_flag ? s_flag : s_dig) + i,
       });
     }

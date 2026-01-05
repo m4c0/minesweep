@@ -17,7 +17,7 @@ static constexpr const ms::game_parameters parameters[levels] {
   { .difficulty = ms::s_easy,   .label_w = 3.0f, .grid_size = 10, .max_bombs =   8 },
   { .difficulty = ms::s_medium, .label_w = 4.5f, .grid_size = 16, .max_bombs =  30 },
   { .difficulty = ms::s_hard,   .label_w = 3.0f, .grid_size = 24, .max_bombs =  64 },
-  { .difficulty = ms::s_crazy,  .label_w = 4.0f, .grid_size = 36, .max_bombs = 144 },
+  { .difficulty = ms::s_crazy,  .label_w = 3.5f, .grid_size = 36, .max_bombs = 144 },
 };
 
 static ms::grid g_grid[levels] {
