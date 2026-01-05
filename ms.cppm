@@ -154,6 +154,7 @@ static void toggle_fullscreen() {
 extern "C" void casein_init() {
   using namespace casein;
   window_title = "Minesweep";
+  window_size = { 800, 800 };
 
   v::on<KEY_DOWN, K_SPACE, reset_level>();
 #ifndef LECO_TARGET_WASM
