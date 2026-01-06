@@ -95,12 +95,13 @@ class grid {
     return m_cells[y * grid_size() + x];
   }
 
-  void draw_won(auto & m) const {
+  void draw_won(auto & m) {
     static constexpr const auto grav = 18;
     static constexpr const auto v_0 = -20;
 
     auto secs = m_winning.secs();
 
+    bool all_fell = true;
     for (auto i = 0; i < m_cells.size(); i++) {
       const auto &cell = m_cells[i];
       float x = i % grid_size();
@@ -114,7 +115,10 @@ class grid {
         .colour = colour_of(cell),
         .uv = uv(cell),
       });
+      if (y < grid_size() + 2) all_fell = false;
     }
+
+    if (all_fell) reset();
   }
 
 public:
